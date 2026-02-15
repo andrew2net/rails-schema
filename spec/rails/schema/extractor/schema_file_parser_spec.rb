@@ -99,7 +99,7 @@ RSpec.describe Rails::Schema::Extractor::SchemaFileParser do
       cols = result["users"].reject { |c| c[:primary] }
 
       expect(cols.map { |c| [c[:name], c[:type]] }).to eq(
-        [["name", "string"], ["bio", "text"], ["age", "integer"], ["active", "boolean"], ["created_at", "datetime"]]
+        [%w[name string], %w[bio text], %w[age integer], %w[active boolean], %w[created_at datetime]]
       )
     end
 

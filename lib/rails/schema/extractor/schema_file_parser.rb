@@ -16,33 +16,14 @@ module Rails
         end
 
         def parse_content(content)
-          tables = {}
-          current_table = nil
-          pk_type = nil
-          has_pk = true
+          @tables = {}
+          @current_table = nil
+          @pk_type = nil
+          @has_pk = true
 
-          content.each_line do |line|
-            stripped = line.strip
+          content.each_line { |line| process_line(line.strip) }
 
-            if (match = stripped.match(/\Acreate_table\s+"(\w+)"/))
-              current_table = match[1]
-              tables[current_table] = []
-              has_pk = !stripped.match?(/id:\s*false/)
-              pk_type = extract_pk_type(stripped)
-            elsif current_table && stripped == "end"
-              if has_pk
-                pk_column = { name: "id", type: pk_type, nullable: false, default: nil, primary: true }
-                tables[current_table].unshift(pk_column)
-              end
-              current_table = nil
-              pk_type = nil
-              has_pk = true
-            elsif current_table && (col = parse_column(stripped))
-              tables[current_table] << col
-            end
-          end
-
-          tables
+          @tables
         end
 
         private
@@ -84,11 +65,36 @@ module Rails
           }
         end
 
+        def process_line(stripped)
+          if (match = stripped.match(/\Acreate_table\s+"(\w+)"/))
+            start_table(match, stripped)
+          elsif @current_table && stripped == "end"
+            close_table
+          elsif @current_table && (col = parse_column(stripped))
+            @tables[@current_table] << col
+          end
+        end
+
+        def start_table(match, stripped)
+          @current_table = match[1]
+          @tables[@current_table] = []
+          @has_pk = !stripped.match?(/id:\s*false/)
+          @pk_type = extract_pk_type(stripped)
+        end
+
+        def close_table
+          if @has_pk
+            pk_column = { name: "id", type: @pk_type, nullable: false, default: nil, primary: true }
+            @tables[@current_table].unshift(pk_column)
+          end
+          @current_table = nil
+          @pk_type = nil
+          @has_pk = true
+        end
+
         def extract_default(options)
-          if (match = options.match(/default:\s*"([^"]*)"/))
-            match[1]
-          elsif (match = options.match(/default:\s*(\d+(?:\.\d+)?)/))
-            match[1]
+          if (match = options.match(/default:\s*(?:"([^"]*)"|(\d+(?:\.\d+)?))/))
+            match[1] || match[2]
           elsif options.match?(/default:\s*true/)
             "true"
           elsif options.match?(/default:\s*false/)

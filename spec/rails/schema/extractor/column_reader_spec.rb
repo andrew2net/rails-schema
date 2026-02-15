@@ -55,7 +55,7 @@ RSpec.describe Rails::Schema::Extractor::ColumnReader do
         columns = reader.read(User)
 
         expect(columns.length).to eq(3)
-        expect(columns.map { |c| c[:name] }).to eq(["id", "name", "email"])
+        expect(columns.map { |c| c[:name] }).to eq(%w[id name email])
       end
 
       it "does not hit the database" do

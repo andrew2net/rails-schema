@@ -9,7 +9,7 @@ module Rails
         end
 
         def read(model)
-          if @schema_data && @schema_data.key?(model.table_name)
+          if @schema_data&.key?(model.table_name)
             @schema_data[model.table_name]
           else
             read_from_model(model)
