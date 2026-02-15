@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" class="<%= theme_class %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <style><%= css_content %></style>
+</head>
+<body>
+  <div id="app">
+    <div id="sidebar">
+      <div id="sidebar-header">
+        <h1><%= title %></h1>
+        <input type="text" id="search-input" placeholder="Search models... ( / )" autocomplete="off">
+      </div>
+      <div id="sidebar-actions">
+        <button id="select-all-btn">Select All</button>
+        <button id="deselect-all-btn">Deselect All</button>
+      </div>
+      <div id="model-list"></div>
+    </div>
+
+    <div id="toolbar">
+      <div class="legend">
+        <span class="legend-item"><span class="legend-line belongs_to"></span> belongs_to</span>
+        <span class="legend-item"><span class="legend-line has_many"></span> has_many</span>
+        <span class="legend-item"><span class="legend-line has_one"></span> has_one</span>
+        <span class="legend-item"><span class="legend-line habtm"></span> habtm</span>
+      </div>
+      <div class="spacer"></div>
+      <span class="zoom-info" id="zoom-info">100%</span>
+      <button id="zoom-in-btn" title="Zoom in (+)">+</button>
+      <button id="zoom-out-btn" title="Zoom out (-)">−</button>
+      <button id="fit-btn" title="Fit to screen (F)">Fit</button>
+      <button id="theme-btn" title="Toggle theme">Theme</button>
+      <span class="shortcuts-hint">/ search · Esc deselect · F fit</span>
+    </div>
+
+    <div id="canvas-container">
+      <svg id="schema-svg"></svg>
+    </div>
+
+    <div id="detail-panel">
+      <div id="detail-content"></div>
+    </div>
+  </div>
+
+  <script>window.__SCHEMA_DATA__ = <%= graph_json %>;</script>
+  <script>window.__SCHEMA_CONFIG__ = <%= config_json %>;</script>
+  <script><%= d3_js_content %></script>
+  <script><%= app_js_content %></script>
+</body>
+</html>
