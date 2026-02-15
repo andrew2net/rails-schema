@@ -4,6 +4,10 @@ Interactive HTML visualization of your Rails database schema. Introspects your a
 
 No external server, no CDN — just one command and a browser.
 
+**[Live example — Fizzy DB schema](https://andrew2net.github.io/rails-schema/)**
+
+![Rails Schema screenshot](docs/screenshot.png)
+
 ## Installation
 
 Add to your Gemfile:
