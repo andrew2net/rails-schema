@@ -4,6 +4,7 @@ require_relative "schema/version"
 require_relative "schema/configuration"
 require_relative "schema/transformer/node"
 require_relative "schema/transformer/edge"
+require_relative "schema/extractor/schema_file_parser"
 require_relative "schema/extractor/model_scanner"
 require_relative "schema/extractor/column_reader"
 require_relative "schema/extractor/association_reader"
@@ -28,8 +29,10 @@ module Rails
       end
 
       def generate(output: nil)
-        models = Extractor::ModelScanner.new.scan
-        graph_data = Transformer::GraphBuilder.new.build(models)
+        schema_data = Extractor::SchemaFileParser.new.parse
+        models = Extractor::ModelScanner.new(schema_data: schema_data).scan
+        column_reader = Extractor::ColumnReader.new(schema_data: schema_data)
+        graph_data = Transformer::GraphBuilder.new(column_reader: column_reader).build(models)
         generator = Renderer::HtmlGenerator.new(graph_data: graph_data)
         generator.render_to_file(output)
       end
