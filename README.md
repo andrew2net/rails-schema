@@ -52,8 +52,13 @@ Rails::Schema.configure do |config|
 end
 ```
 
+## How it works
+
+The gem parses your `db/schema.rb` file to extract table and column information — **no database connection required**. It also introspects loaded ActiveRecord models for association metadata. This means the gem works even if you don't have a local database set up, as long as `db/schema.rb` is present (which is standard in Rails projects under version control).
+
 ## Features
 
+- **No database required** — reads directly from `db/schema.rb`
 - **Force-directed layout** — models cluster naturally by association density
 - **Searchable sidebar** — filter models by name or table
 - **Click-to-focus** — click a model to highlight its neighborhood, fading unrelated models
