@@ -310,6 +310,8 @@ body {
 .edge-line {
   fill: none;
   stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .edge-line.belongs_to { stroke: var(--edge-belongs-to); }
@@ -471,3 +473,23 @@ body {
 .legend-line.has_many { background: var(--edge-has-many); }
 .legend-line.has_one { background: var(--edge-has-one); }
 .legend-line.habtm { background: var(--edge-habtm); }
+
+.legend-line.through {
+  background: var(--edge-color);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--edge-color) 0, var(--edge-color) 6px,
+    transparent 6px, transparent 9px
+  );
+  background-color: transparent;
+}
+
+.legend-line.polymorphic {
+  background: var(--edge-color);
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--edge-color) 0, var(--edge-color) 3px,
+    transparent 3px, transparent 6px
+  );
+  background-color: transparent;
+}
