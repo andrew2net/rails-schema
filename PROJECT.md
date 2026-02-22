@@ -43,7 +43,7 @@ Rails::Schema.generate(output: "docs/schema.html")
 
 | Layer | Responsibility | Key Classes |
 |---|---|---|
-| **Extractor** | Introspects Rails environment; collects models, columns, associations | `Rails::Schema::Extractor::ModelScanner`, `ColumnReader`, `AssociationReader`, `SchemaFileParser` |
+| **Extractor** | Introspects Rails environment; collects models, columns, associations | `Rails::Schema::Extractor::ModelScanner`, `ColumnReader`, `AssociationReader`, `SchemaFileParser`, `StructureSqlParser` |
 | **Transformer** | Normalizes extracted data into a serializable graph structure (nodes + edges + metadata) | `Rails::Schema::Transformer::GraphBuilder`, `Node`, `Edge` |
 | **Renderer** | Takes the graph data and injects it into an HTML/JS/CSS template using ERB | `Rails::Schema::Renderer::HtmlGenerator` |
 | **Railtie** | Provides the `rails_schema:generate` rake task | `Rails::Schema::Railtie` |
@@ -52,12 +52,22 @@ Rails::Schema.generate(output: "docs/schema.html")
 
 ```ruby
 def generate(output: nil)
-  schema_data = Extractor::SchemaFileParser.new.parse
+  schema_data = parse_schema
   models = Extractor::ModelScanner.new(schema_data: schema_data).scan
   column_reader = Extractor::ColumnReader.new(schema_data: schema_data)
   graph_data = Transformer::GraphBuilder.new(column_reader: column_reader).build(models)
   generator = Renderer::HtmlGenerator.new(graph_data: graph_data)
   generator.render_to_file(output)
+end
+
+def parse_schema
+  case configuration.schema_format
+  when :ruby then Extractor::SchemaFileParser.new.parse
+  when :sql  then Extractor::StructureSqlParser.new.parse
+  when :auto
+    data = Extractor::SchemaFileParser.new.parse
+    data.empty? ? Extractor::StructureSqlParser.new.parse : data
+  end
 end
 ```
 
@@ -68,8 +78,9 @@ end
 ### 3.1 Sources of Truth
 
 1. **`db/schema.rb` parsing** — `SchemaFileParser` parses the schema file line-by-line with regex to extract table names, column definitions (name, type, nullable, default), and primary key info. This is attempted first and used as a fast, database-free source.
-2. **ActiveRecord reflection API** — `AssociationReader` uses `Model.reflect_on_all_associations` for associations (`has_many`, `belongs_to`, `has_one`, `has_and_belongs_to_many`), including `:through` and `:polymorphic`.
-3. **`Model.columns`** — `ColumnReader` falls back to `model.columns` via ActiveRecord when a table is not found in schema_data.
+2. **`db/structure.sql` parsing** — `StructureSqlParser` parses SQL `CREATE TABLE` statements for projects using `config.active_record.schema_format = :sql`. Maps SQL types to Rails-friendly types, detects `NOT NULL`, `DEFAULT` values, and primary keys. Handles schema-qualified names (`public.users`), timestamp precision (`timestamp(6)`), and both quoted and unquoted identifiers.
+3. **ActiveRecord reflection API** — `AssociationReader` uses `Model.reflect_on_all_associations` for associations (`has_many`, `belongs_to`, `has_one`, `has_and_belongs_to_many`), including `:through` and `:polymorphic`.
+4. **`Model.columns`** — `ColumnReader` falls back to `model.columns` via ActiveRecord when a table is not found in schema_data.
 
 ### 3.2 Model Discovery
 
@@ -92,7 +103,19 @@ When `schema_data` is available, table existence is checked against parsed schem
 - Handles custom primary key types (`id: :uuid`, `id: :bigint`) and `id: false`
 - Skips index definitions
 
-### 3.4 Intermediate Data Format (JSON Graph)
+### 3.4 Structure SQL Parser
+
+`StructureSqlParser` provides database-free column extraction from SQL dumps:
+
+- Parses `CREATE TABLE` statements from `db/structure.sql`
+- Maps SQL types to Rails types (e.g. `character varying` → `string`, `bigint` → `bigint`, `timestamp without time zone` → `datetime`)
+- Handles schema-qualified table names (`public.users` → `users`)
+- Handles timestamp precision (`timestamp(6) without time zone`)
+- Detects primary keys from `CONSTRAINT ... PRIMARY KEY` and inline `PRIMARY KEY`
+- Extracts `NOT NULL`, `DEFAULT` values (strings, numbers, booleans)
+- Skips constraint lines (`CONSTRAINT`, `UNIQUE`, `CHECK`, `FOREIGN KEY`, etc.)
+
+### 3.5 Intermediate Data Format (JSON Graph)
 
 ```json
 {
@@ -195,6 +218,7 @@ Rails::Schema.configure do |config|
   config.title          = "Database Schema"      # Page title
   config.theme          = :auto                  # :light, :dark, :auto
   config.expand_columns = false                  # Start with columns expanded
+  config.schema_format  = :auto                  # :auto, :ruby, or :sql
 end
 ```
 
@@ -208,13 +232,14 @@ rails-schema/
 │   ├── rails/schema.rb                    # Entry point, configuration DSL, generate method
 │   └── rails/schema/
 │       ├── version.rb                     # VERSION = "0.1.0"
-│       ├── configuration.rb               # Config object (5 attributes)
+│       ├── configuration.rb               # Config object (6 attributes)
 │       ├── railtie.rb                     # Rails integration, rake task
 │       ├── extractor/
 │       │   ├── model_scanner.rb           # Discovers AR models
 │       │   ├── association_reader.rb      # Reads reflections
 │       │   ├── column_reader.rb           # Reads columns (schema_data or AR)
-│       │   └── schema_file_parser.rb      # Parses db/schema.rb
+│       │   ├── schema_file_parser.rb      # Parses db/schema.rb
+│       │   └── structure_sql_parser.rb   # Parses db/structure.sql
 │       ├── transformer/
 │       │   ├── graph_builder.rb           # Builds node/edge graph
 │       │   ├── node.rb                    # Value object
@@ -238,7 +263,8 @@ rails-schema/
 │       │   ├── model_scanner_spec.rb
 │       │   ├── column_reader_spec.rb
 │       │   ├── association_reader_spec.rb
-│       │   └── schema_file_parser_spec.rb
+│       │   ├── schema_file_parser_spec.rb
+│       │   └── structure_sql_parser_spec.rb
 │       ├── transformer/
 │       │   └── graph_builder_spec.rb
 │       └── renderer/
@@ -263,9 +289,9 @@ rails-schema/
 
 A mounted engine requires a running server. A static file can be generated in CI, committed to the repo, and opened by anyone — including non-developers looking at a data model.
 
-### Why parse schema.rb?
+### Why parse schema.rb / structure.sql?
 
-Parsing `db/schema.rb` allows column extraction without a database connection. This means the gem can work in CI environments or development setups where the database isn't running. It also avoids eager-loading the entire app just to read column metadata.
+Parsing `db/schema.rb` or `db/structure.sql` allows column extraction without a database connection. This means the gem can work in CI environments or development setups where the database isn't running. It also avoids eager-loading the entire app just to read column metadata. The `schema_format: :auto` default tries `schema.rb` first, then falls back to `structure.sql`, so the gem works out of the box regardless of which format a project uses.
 
 ### Why force-directed layout?
 
@@ -297,7 +323,7 @@ spec.add_dependency "railties", ">= 6.0"
 | Renderer | Output tests — verify HTML structure, embedded data, script injection safety |
 | Configuration | Unit tests for defaults and attribute setting |
 
-**66 tests, all passing.** Run with `bundle exec rspec`.
+**94 tests, all passing.** Run with `bundle exec rspec`.
 
 ---
 

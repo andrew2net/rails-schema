@@ -29,4 +29,16 @@ RSpec.describe Rails::Schema do
       expect(Rails::Schema.configuration.title).to eq("Database Schema")
     end
   end
+
+  describe ".configure" do
+    it "allows setting schema_format" do
+      Rails::Schema.configure do |config|
+        config.schema_format = :sql
+      end
+
+      expect(Rails::Schema.configuration.schema_format).to eq(:sql)
+    ensure
+      Rails::Schema.reset_configuration!
+    end
+  end
 end
