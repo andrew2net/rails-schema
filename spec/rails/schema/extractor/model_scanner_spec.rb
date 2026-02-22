@@ -88,6 +88,43 @@ RSpec.describe Rails::Schema::Extractor::ModelScanner do
         expect(mock_app).to have_received(:eager_load!)
       end
 
+      it "logs warning when Zeitwerk eager_load fails" do
+        allow(mock_autoloader).to receive(:eager_load_dir).and_raise(StandardError, "Zeitwerk error")
+        allow(mock_app).to receive(:eager_load!)
+
+        expect { scanner.scan }.to output(/Zeitwerk eager_load failed/).to_stderr
+      end
+
+      it "logs warning when eager_load! fails" do
+        allow(mock_autoloader).to receive(:eager_load_dir).and_raise(StandardError, "Zeitwerk error")
+        allow(mock_app).to receive(:eager_load!).and_raise(StandardError, "load error")
+
+        expect { scanner.scan }.to output(/eager_load! failed/).to_stderr
+      end
+
+      it "logs warning when a model file fails to load" do
+        allow(mock_autoloader).to receive(:eager_load_dir).and_raise(StandardError, "Zeitwerk error")
+        allow(mock_app).to receive(:eager_load!).and_raise(StandardError, "load error")
+
+        models_dir = tmp.join("app", "models")
+        File.write(models_dir.join("bad_load_model.rb"), "raise 'boom'")
+
+        expect { scanner.scan }.to output(/Could not load/).to_stderr
+      end
+
+      it "logs warning when table_exists? fails" do
+        allow(mock_autoloader).to receive(:eager_load_dir)
+        allow(mock_app).to receive(:eager_load!)
+
+        mock_model = class_double("ActiveRecord::Base", name: "BadTable",
+                                                        abstract_class?: false,
+                                                        table_name: "bad_tables")
+        allow(mock_model).to receive(:table_exists?).and_raise(StandardError, "connection error")
+        allow(ActiveRecord::Base).to receive(:descendants).and_return([mock_model])
+
+        expect { scanner.scan }.to output(/Could not check table for BadTable/).to_stderr
+      end
+
       it "falls back to per-file loading when both fail" do
         allow(mock_autoloader).to receive(:eager_load_dir).and_raise(StandardError, "Zeitwerk error")
         allow(mock_app).to receive(:eager_load!).and_raise(ActiveRecord::AdapterNotSpecified)

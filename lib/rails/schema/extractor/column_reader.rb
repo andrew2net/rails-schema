@@ -28,7 +28,8 @@ module Rails
               default: col.default
             }
           end
-        rescue StandardError
+        rescue StandardError => e
+          warn "[rails-schema] Could not read columns for #{model.name}: #{e.class}: #{e.message}"
           []
         end
       end
