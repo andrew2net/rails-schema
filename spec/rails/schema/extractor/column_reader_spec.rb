@@ -38,6 +38,22 @@ RSpec.describe Rails::Schema::Extractor::ColumnReader do
       end
     end
 
+    context "when model.columns raises" do
+      subject(:reader) { described_class.new }
+
+      it "warns and returns empty array" do
+        model = double("Model", name: "Broken", table_name: "brokens")
+        allow(model).to receive(:columns).and_raise(StandardError, "no db")
+
+        columns = nil
+        expect {
+          columns = reader.read(model)
+        }.to output(/Could not read columns for Broken/).to_stderr
+
+        expect(columns).to eq([])
+      end
+    end
+
     context "with schema_data" do
       let(:schema_data) do
         {

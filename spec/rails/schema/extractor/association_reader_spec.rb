@@ -56,5 +56,50 @@ RSpec.describe Rails::Schema::Extractor::AssociationReader do
 
       expect(user_assoc[:foreign_key]).to eq("user_id")
     end
+
+    context "when build_association_data raises" do
+      it "warns and excludes the broken association" do
+        bad_klass = double("Klass", name: "Bogus")
+        bad_ref = double("reflection",
+                         macro: :has_many,
+                         name: :broken,
+                         options: {},
+                         klass: bad_klass,
+                         class_name: "Bogus")
+        allow(bad_ref).to receive(:foreign_key).and_raise(StandardError, "kaboom")
+
+        model = double("Model", name: "Foo",
+                                reflect_on_all_associations: [bad_ref])
+
+        assocs = nil
+        expect {
+          assocs = reader.read(model)
+        }.to output(/Could not read association broken on Foo/).to_stderr
+
+        expect(assocs).to eq([])
+      end
+    end
+
+    context "when target_model_name raises" do
+      it "warns and falls back to class_name" do
+        bad_ref = double("reflection",
+                         macro: :belongs_to,
+                         name: :author,
+                         class_name: "Author",
+                         options: {},
+                         foreign_key: "author_id")
+        allow(bad_ref).to receive(:klass).and_raise(StandardError, "no table")
+
+        model = double("Model", name: "Article",
+                                reflect_on_all_associations: [bad_ref])
+
+        assocs = nil
+        expect {
+          assocs = reader.read(model)
+        }.to output(/Could not resolve target for author/).to_stderr
+
+        expect(assocs.first[:to]).to eq("Author")
+      end
+    end
   end
 end

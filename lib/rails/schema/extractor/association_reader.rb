@@ -29,13 +29,16 @@ module Rails
             through: ref.options[:through]&.to_s,
             polymorphic: ref.options[:as] ? true : false
           }
-        rescue StandardError
+        rescue StandardError => e
+          warn "[rails-schema] Could not read association #{ref.name} on #{model.name}: #{e.class}: #{e.message}"
           nil
         end
 
         def target_model_name(ref)
           ref.klass.name
-        rescue StandardError
+        rescue StandardError => e
+          warn "[rails-schema] Could not resolve target for #{ref.name}, " \
+               "falling back to #{ref.class_name}: #{e.class}: #{e.message}"
           ref.class_name
         end
       end
