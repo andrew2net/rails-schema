@@ -8,7 +8,7 @@
 
 **Name:** `rails-schema`
 **Module:** `Rails::Schema`
-**Version:** `0.1.0`
+**Version:** `0.1.2`
 
 Rails::Schema introspects a Rails app's models, associations, and database columns at runtime, then generates a single self-contained HTML file with an interactive, explorable entity-relationship diagram. No external server, no SaaS dependency — just one command and a browser.
 
@@ -231,7 +231,7 @@ rails-schema/
 ├── lib/
 │   ├── rails/schema.rb                    # Entry point, configuration DSL, generate method
 │   └── rails/schema/
-│       ├── version.rb                     # VERSION = "0.1.0"
+│       ├── version.rb                     # VERSION = "0.1.2"
 │       ├── configuration.rb               # Config object (6 attributes)
 │       ├── railtie.rb                     # Rails integration, rake task
 │       ├── extractor/
@@ -318,12 +318,12 @@ spec.add_dependency "railties", ">= 6.0"
 
 | Layer | Approach |
 |---|---|
-| Extractor | Unit tests with in-memory SQLite models (User, Post, Comment, Tag) |
+| Extractor | Unit tests with in-memory SQLite models (User, Post, Comment, Tag); rescue-path warnings tested via `output(...).to_stderr` |
 | Transformer | Pure Ruby unit tests — graph building, edge filtering |
 | Renderer | Output tests — verify HTML structure, embedded data, script injection safety |
 | Configuration | Unit tests for defaults and attribute setting |
 
-**94 tests, all passing.** Run with `bundle exec rspec`.
+**108 tests, all passing.** Run with `bundle exec rspec`.
 
 ---
 
@@ -345,4 +345,4 @@ spec.add_dependency "railties", ">= 6.0"
 
 ---
 
-*Document reflects the current implementation (v0.1.0). Future enhancements are aspirational and subject to refinement.*
+*Document reflects the current implementation (v0.1.2). Future enhancements are aspirational and subject to refinement.*
