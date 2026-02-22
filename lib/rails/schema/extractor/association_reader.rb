@@ -26,12 +26,20 @@ module Rails
             association_type: ref.macro.to_s,
             label: ref.name.to_s,
             foreign_key: ref.foreign_key.to_s,
-            through: ref.options[:through]&.to_s,
-            polymorphic: ref.options[:as] ? true : false
+            through: through_name(ref),
+            polymorphic: polymorphic?(ref)
           }
         rescue StandardError => e
           warn "[rails-schema] Could not read association #{ref.name} on #{model.name}: #{e.class}: #{e.message}"
           nil
+        end
+
+        def through_name(ref)
+          ref.options[:through]&.to_s
+        end
+
+        def polymorphic?(ref)
+          ref.options[:as] ? true : false
         end
 
         def target_model_name(ref)

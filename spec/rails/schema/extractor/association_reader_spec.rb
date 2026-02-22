@@ -72,9 +72,9 @@ RSpec.describe Rails::Schema::Extractor::AssociationReader do
                                 reflect_on_all_associations: [bad_ref])
 
         assocs = nil
-        expect {
+        expect do
           assocs = reader.read(model)
-        }.to output(/Could not read association broken on Foo/).to_stderr
+        end.to output(/Could not read association broken on Foo/).to_stderr
 
         expect(assocs).to eq([])
       end
@@ -94,9 +94,9 @@ RSpec.describe Rails::Schema::Extractor::AssociationReader do
                                 reflect_on_all_associations: [bad_ref])
 
         assocs = nil
-        expect {
+        expect do
           assocs = reader.read(model)
-        }.to output(/Could not resolve target for author/).to_stderr
+        end.to output(/Could not resolve target for author/).to_stderr
 
         expect(assocs.first[:to]).to eq("Author")
       end

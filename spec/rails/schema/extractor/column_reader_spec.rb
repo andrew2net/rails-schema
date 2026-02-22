@@ -46,9 +46,9 @@ RSpec.describe Rails::Schema::Extractor::ColumnReader do
         allow(model).to receive(:columns).and_raise(StandardError, "no db")
 
         columns = nil
-        expect {
+        expect do
           columns = reader.read(model)
-        }.to output(/Could not read columns for Broken/).to_stderr
+        end.to output(/Could not read columns for Broken/).to_stderr
 
         expect(columns).to eq([])
       end
