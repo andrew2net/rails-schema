@@ -17,6 +17,9 @@
   --edge-has-many: #2ec4b6;
   --edge-has-one: #ff6b6b;
   --edge-habtm: #ffd166;
+  --edge-embeds-many: #a855f7;
+  --edge-embeds-one: #c084fc;
+  --edge-embedded-in: #a855f7;
   --shadow: 0 2px 8px rgba(0,0,0,0.1);
   --sidebar-width: 280px;
   --detail-width: 320px;
@@ -42,6 +45,9 @@
   --edge-has-many: #2ec4b6;
   --edge-has-one: #ff6b6b;
   --edge-habtm: #ffd166;
+  --edge-embeds-many: #a855f7;
+  --edge-embeds-one: #c084fc;
+  --edge-embedded-in: #a855f7;
   --shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
@@ -65,6 +71,9 @@
     --edge-has-many: #2ec4b6;
     --edge-has-one: #ff6b6b;
     --edge-habtm: #ffd166;
+    --edge-embeds-many: #a855f7;
+    --edge-embeds-one: #c084fc;
+    --edge-embedded-in: #a855f7;
     --shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
 }
@@ -318,6 +327,9 @@ body {
 .edge-line.has_many { stroke: var(--edge-has-many); }
 .edge-line.has_one { stroke: var(--edge-has-one); }
 .edge-line.has_and_belongs_to_many { stroke: var(--edge-habtm); }
+.edge-line.embeds_many { stroke: var(--edge-embeds-many); stroke-dasharray: 4 2; }
+.edge-line.embeds_one { stroke: var(--edge-embeds-one); stroke-dasharray: 4 2; }
+.edge-line.embedded_in { stroke: var(--edge-embedded-in); stroke-dasharray: 4 2; }
 
 .edge-line.through {
   stroke-dasharray: 6 3;
@@ -480,6 +492,22 @@ body {
 .legend-line.has_many { background: var(--edge-has-many); }
 .legend-line.has_one { background: var(--edge-has-one); }
 .legend-line.habtm { background: var(--edge-habtm); }
+.legend-line.embeds_many {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--edge-embeds-many) 0, var(--edge-embeds-many) 4px,
+    transparent 4px, transparent 6px
+  );
+  background-color: transparent;
+}
+.legend-line.embeds_one {
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--edge-embeds-one) 0, var(--edge-embeds-one) 4px,
+    transparent 4px, transparent 6px
+  );
+  background-color: transparent;
+}
 
 .legend-line.through {
   background: var(--edge-color);
