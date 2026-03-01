@@ -17,6 +17,10 @@ Metrics/BlockLength:
     - "spec/**/*"
     - "*.gemspec"
 
+Style/OneClassPerFile:
+  Exclude:
+    - "spec/support/**/*"
+
 Metrics/ParameterLists:
   Max: 7
 
