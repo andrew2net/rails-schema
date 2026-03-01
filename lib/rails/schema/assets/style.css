@@ -334,6 +334,13 @@ body {
   pointer-events: none;
 }
 
+.edge-label-bg {
+  fill: var(--bg-primary);
+  opacity: 0.85;
+  rx: 2;
+  pointer-events: none;
+}
+
 /* Faded state for non-focused elements */
 .faded { opacity: 0.15; transition: opacity 0.3s; }
 .highlighted { transition: opacity 0.3s; }
