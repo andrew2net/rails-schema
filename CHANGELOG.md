@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.3] - 2026-03-01
+
+### Added
+
+- Mongoid support: visualize MongoDB-backed models without a schema file (`schema_format: :mongoid`)
+- Auto-detection of Mongoid when `schema_format: :auto` and `Mongoid::Document` is defined
+- Mongoid extractors: `ModelScanner`, `ModelAdapter`, `ColumnReader`, `AssociationReader`
+- Support for all Mongoid association types: `has_many`, `has_one`, `belongs_to`, `has_and_belongs_to_many`, `embeds_many`, `embeds_one`, `embedded_in`
+- Embedded document styling in the frontend (dashed borders for embed associations)
+- Engine model eager-loading for Mongoid apps
+
 ## [0.1.2] - 2026-02-22
 
 ### Added
