@@ -63,19 +63,19 @@ RSpec.describe Rails::Schema::Extractor::Mongoid::ModelScanner do
 
       # Stub Rails::Engine and Rails::Application for the test env
       let!(:engine_base) do
-        unless defined?(::Rails::Engine)
+        unless defined?(Rails::Engine)
           stub_class = Class.new
-          ::Rails.const_set(:Engine, stub_class)
+          Rails.const_set(:Engine, stub_class)
         end
-        ::Rails::Engine
+        Rails::Engine
       end
 
       let!(:application_base) do
-        unless defined?(::Rails::Application)
+        unless defined?(Rails::Application)
           stub_class = Class.new(engine_base)
-          ::Rails.const_set(:Application, stub_class)
+          Rails.const_set(:Application, stub_class)
         end
-        ::Rails::Application
+        Rails::Application
       end
 
       let(:mock_engine_class) do
@@ -128,7 +128,7 @@ RSpec.describe Rails::Schema::Extractor::Mongoid::ModelScanner do
 
         # Only called once for the main app models path, not for the engine
         expect(mock_autoloader).to have_received(:eager_load_dir).once
-          .with(tmp.join("app", "models").to_s)
+                                                                 .with(tmp.join("app", "models").to_s)
       end
     end
   end

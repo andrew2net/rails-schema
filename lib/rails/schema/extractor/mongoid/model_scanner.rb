@@ -29,7 +29,7 @@ module Rails
           def eager_load_models!
             return unless defined?(::Rails.application) && ::Rails.application
 
-            if defined?(::Rails.autoloaders) && ::Rails.autoloaders.respond_to?(:main)
+            if zeitwerk_available?
               eager_load_via_zeitwerk!
             else
               eager_load_via_application!
@@ -93,18 +93,28 @@ module Rails
             models_paths = engine.paths["app/models"]&.existent || []
             return if models_paths.empty?
 
-            if defined?(::Rails.autoloaders) && ::Rails.autoloaders.respond_to?(:main)
-              loader = ::Rails.autoloaders.main
-              models_paths.each do |path|
-                loader.eager_load_dir(path) if loader.respond_to?(:eager_load_dir)
-              end
+            if zeitwerk_available?
+              eager_load_engine_zeitwerk(models_paths)
             else
-              models_paths.each do |path|
-                Dir.glob(File.join(path, "**/*.rb")).each do |file|
-                  require file
-                rescue StandardError => e
-                  warn "[rails-schema] Could not load engine model #{file}: #{e.class}: #{e.message}"
-                end
+              eager_load_engine_files(models_paths)
+            end
+          end
+
+          def zeitwerk_available?
+            defined?(::Rails.autoloaders) && ::Rails.autoloaders.respond_to?(:main)
+          end
+
+          def eager_load_engine_zeitwerk(paths)
+            loader = ::Rails.autoloaders.main
+            paths.each { |path| loader.eager_load_dir(path) if loader.respond_to?(:eager_load_dir) }
+          end
+
+          def eager_load_engine_files(paths)
+            paths.each do |path|
+              Dir.glob(File.join(path, "**/*.rb")).each do |file|
+                require file
+              rescue StandardError => e
+                warn "[rails-schema] Could not load engine model #{file}: #{e.class}: #{e.message}"
               end
             end
           end

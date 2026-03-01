@@ -60,11 +60,15 @@ module Rails
         generator.render_to_file(output)
       end
 
-      def generate_mongoid(output:)
+      def require_mongoid_extractors
         require_relative "schema/extractor/mongoid/model_scanner"
         require_relative "schema/extractor/mongoid/model_adapter"
         require_relative "schema/extractor/mongoid/column_reader"
         require_relative "schema/extractor/mongoid/association_reader"
+      end
+
+      def generate_mongoid(output:)
+        require_mongoid_extractors
 
         raw_models = Extractor::Mongoid::ModelScanner.new.scan
         models = raw_models.map { |m| Extractor::Mongoid::ModelAdapter.new(m) }
