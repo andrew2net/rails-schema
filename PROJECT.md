@@ -43,7 +43,7 @@ Rails::Schema.generate(output: "docs/schema.html")
 
 | Layer | Responsibility | Key Classes |
 |---|---|---|
-| **Extractor** | Introspects Rails environment; collects models, columns, associations | `Rails::Schema::Extractor::ModelScanner`, `ColumnReader`, `AssociationReader`, `SchemaFileParser`, `StructureSqlParser` |
+| **Extractor** | Introspects Rails environment; collects models, columns, associations | `Rails::Schema::Extractor::ModelScanner`, `ColumnReader`, `AssociationReader`, `SchemaFileParser`, `StructureSqlParser`, plus `Mongoid::ModelScanner`, `Mongoid::ModelAdapter`, `Mongoid::ColumnReader`, `Mongoid::AssociationReader` |
 | **Transformer** | Normalizes extracted data into a serializable graph structure (nodes + edges + metadata) | `Rails::Schema::Transformer::GraphBuilder`, `Node`, `Edge` |
 | **Renderer** | Takes the graph data and injects it into an HTML/JS/CSS template using ERB | `Rails::Schema::Renderer::HtmlGenerator` |
 | **Railtie** | Provides the `rails_schema:generate` rake task | `Rails::Schema::Railtie` |
@@ -84,7 +84,7 @@ end
 
 ### 3.2 Model Discovery
 
-`ModelScanner` discovers models by:
+`ModelScanner` (ActiveRecord) discovers models by:
 
 1. Calling `Rails.application.eager_load!` (with Zeitwerk support and multiple fallback strategies)
 2. Collecting `ActiveRecord::Base.descendants`
@@ -93,6 +93,14 @@ end
 5. Returning models sorted by name
 
 When `schema_data` is available, table existence is checked against parsed schema data instead of hitting the database.
+
+`Mongoid::ModelScanner` discovers Mongoid models by:
+
+1. Eager-loading models via Zeitwerk or file glob (with fallback strategies)
+2. Scanning `ObjectSpace` for classes that include `Mongoid::Document`
+3. Also eager-loads models from mounted Rails engines
+4. Applying `exclude_models` configuration
+5. Returning models sorted by name, wrapped in `ModelAdapter` for GraphBuilder compatibility
 
 ### 3.3 Schema File Parser
 
@@ -218,7 +226,7 @@ Rails::Schema.configure do |config|
   config.title          = "Database Schema"      # Page title
   config.theme          = :auto                  # :light, :dark, :auto
   config.expand_columns = false                  # Start with columns expanded
-  config.schema_format  = :auto                  # :auto, :ruby, or :sql
+  config.schema_format  = :auto                  # :auto, :ruby, :sql, or :mongoid
 end
 ```
 
@@ -239,7 +247,12 @@ rails-schema/
 │       │   ├── association_reader.rb      # Reads reflections
 │       │   ├── column_reader.rb           # Reads columns (schema_data or AR)
 │       │   ├── schema_file_parser.rb      # Parses db/schema.rb
-│       │   └── structure_sql_parser.rb   # Parses db/structure.sql
+│       │   ├── structure_sql_parser.rb   # Parses db/structure.sql
+│       │   └── mongoid/
+│       │       ├── model_scanner.rb      # Discovers Mongoid models
+│       │       ├── model_adapter.rb      # Wraps Mongoid model for GraphBuilder
+│       │       ├── column_reader.rb      # Reads Mongoid fields
+│       │       └── association_reader.rb # Reads Mongoid relations
 │       ├── transformer/
 │       │   ├── graph_builder.rb           # Builds node/edge graph
 │       │   ├── node.rb                    # Value object
@@ -255,7 +268,8 @@ rails-schema/
 ├── spec/
 │   ├── spec_helper.rb
 │   ├── support/
-│   │   └── test_models.rb                # User, Post, Comment, Tag models
+│   │   ├── test_models.rb                # User, Post, Comment, Tag AR models
+│   │   └── mongoid_test_models.rb       # MongoidUser, MongoidPost, MongoidComment
 │   └── rails/schema/
 │       ├── rails_schema_spec.rb
 │       ├── configuration_spec.rb
@@ -264,7 +278,12 @@ rails-schema/
 │       │   ├── column_reader_spec.rb
 │       │   ├── association_reader_spec.rb
 │       │   ├── schema_file_parser_spec.rb
-│       │   └── structure_sql_parser_spec.rb
+│       │   ├── structure_sql_parser_spec.rb
+│       │   └── mongoid/
+│       │       ├── model_scanner_spec.rb
+│       │       ├── model_adapter_spec.rb
+│       │       ├── column_reader_spec.rb
+│       │       └── association_reader_spec.rb
 │       ├── transformer/
 │       │   └── graph_builder_spec.rb
 │       └── renderer/
@@ -323,7 +342,7 @@ spec.add_dependency "railties", ">= 6.0"
 | Renderer | Output tests — verify HTML structure, embedded data, script injection safety |
 | Configuration | Unit tests for defaults and attribute setting |
 
-**108 tests, all passing.** Run with `bundle exec rspec`.
+**153 tests, all passing.** Run with `bundle exec rspec`.
 
 ---
 

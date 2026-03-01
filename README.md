@@ -48,7 +48,7 @@ Rails::Schema.configure do |config|
   config.title = "My App Schema"
   config.theme = :auto          # :auto, :light, or :dark
   config.expand_columns = false # start with columns collapsed
-  config.schema_format = :auto  # :auto, :ruby, or :sql
+  config.schema_format = :auto  # :auto, :ruby, :sql, or :mongoid
   config.exclude_models = [
     "ActiveStorage::Blob",
     "ActiveStorage::Attachment",
@@ -63,7 +63,7 @@ end
 | `title` | `"Database Schema"` | Title shown in the HTML page |
 | `theme` | `:auto` | Color theme — `:auto`, `:light`, or `:dark` |
 | `expand_columns` | `false` | Whether model nodes start with columns expanded |
-| `schema_format` | `:auto` | Schema source — `:auto`, `:ruby`, or `:sql` (see below) |
+| `schema_format` | `:auto` | Schema source — `:auto`, `:ruby`, `:sql`, or `:mongoid` (see below) |
 | `exclude_models` | `[]` | Models to hide; supports exact names and wildcard prefixes (`"ActionMailbox::*"`) |
 
 ### Schema format
@@ -72,17 +72,34 @@ Rails projects can use either `db/schema.rb` (Ruby DSL) or `db/structure.sql` (r
 
 | Value | Behavior |
 |-------|----------|
-| `:auto` | Tries `db/schema.rb` first, falls back to `db/structure.sql` |
+| `:auto` | Tries `db/schema.rb` first, falls back to `db/structure.sql`. If Mongoid is detected, uses the Mongoid pipeline instead |
 | `:ruby` | Only reads `db/schema.rb` |
 | `:sql` | Only reads `db/structure.sql` |
+| `:mongoid` | Introspects Mongoid models directly (see below) |
+
+### Mongoid support
+
+If your app uses [Mongoid](https://www.mongodb.com/docs/mongoid/current/) instead of ActiveRecord, rails-schema can introspect your Mongoid models directly — no schema file needed.
+
+```ruby
+Rails::Schema.configure do |config|
+  config.schema_format = :mongoid
+end
+```
+
+When set to `:auto`, Mongoid mode activates automatically if `Mongoid::Document` is defined.
+
+The Mongoid pipeline reads fields, types, defaults, and presence validations from your models, and discovers all association types including `embeds_many`, `embeds_one`, `embedded_in`, and `has_and_belongs_to_many`.
 
 ## How it works
 
 The gem parses your `db/schema.rb` or `db/structure.sql` file to extract table and column information — **no database connection required**. It also introspects loaded ActiveRecord models for association metadata. This means the gem works even if you don't have a local database set up, as long as a schema file is present (which is standard in Rails projects under version control).
 
+For Mongoid apps, the gem introspects model classes at runtime to read field definitions, associations, and validations — no schema file or database connection required.
+
 ## Features
 
-- **No database required** — reads from `db/schema.rb` or `db/structure.sql`
+- **No database required** — reads from `db/schema.rb`, `db/structure.sql`, or Mongoid model introspection
 - **Force-directed layout** — models cluster naturally by association density
 - **Searchable sidebar** — filter models by name or table
 - **Click-to-focus** — click a model to highlight its neighborhood, fading unrelated models
