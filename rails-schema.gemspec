@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Interactive HTML visualization of your Rails database schema"
   spec.description = "Introspects a Rails app's models, associations, and columns, then generates " \
                      "a single self-contained HTML file with an interactive entity-relationship diagram."
-  spec.homepage = "https://github.com/nicholaides/rails-schema"
+  spec.homepage = "https://github.com/andrew2net/rails-schema"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.2.0"
 
