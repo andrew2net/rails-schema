@@ -67,7 +67,7 @@ module Rails
             models_path = ::Rails.root.join("app", "models")
             return unless models_path.exist?
 
-            Dir.glob(models_path.join("**/*.rb")).each do |file|
+            Dir.glob(models_path.join("**/*.rb")).sort.each do |file|
               require file
             rescue StandardError => e
               warn "[rails-schema] Could not load #{file}: #{e.class}: #{e.message}"
@@ -111,7 +111,7 @@ module Rails
 
           def eager_load_engine_files(paths)
             paths.each do |path|
-              Dir.glob(File.join(path, "**/*.rb")).each do |file|
+              Dir.glob(File.join(path, "**/*.rb")).sort.each do |file|
                 require file
               rescue StandardError => e
                 warn "[rails-schema] Could not load engine model #{file}: #{e.class}: #{e.message}"

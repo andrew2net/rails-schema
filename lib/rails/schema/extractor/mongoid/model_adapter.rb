@@ -23,9 +23,9 @@ module Rails
             model.respond_to?(method, include_private) || super
           end
 
-          def method_missing(method, ...)
+          def method_missing(method, *args, **kwargs, &block)
             if model.respond_to?(method)
-              model.send(method, ...)
+              model.send(method, *args, **kwargs, &block)
             else
               super
             end

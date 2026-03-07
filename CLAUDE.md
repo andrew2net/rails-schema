@@ -25,7 +25,7 @@ Three-layer pipeline: **Extractor → Transformer → Renderer**
 
 ## Key Conventions
 
-- Ruby >= 3.2, Rails >= 6.0
+- Ruby >= 2.7, Rails >= 5.2
 - Double quotes for strings (RuboCop enforced)
 - RuboCop max method length: 15 lines, default ABC/complexity limits
 - No `Style/Documentation` required
