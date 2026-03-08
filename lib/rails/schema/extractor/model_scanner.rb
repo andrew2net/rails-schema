@@ -43,7 +43,7 @@ module Rails
           else
             loader.eager_load
           end
-        rescue StandardError => e
+        rescue StandardError, LoadError => e
           warn "[rails-schema] Zeitwerk eager_load failed (#{e.class}: #{e.message}), " \
                "trying Rails.application.eager_load!"
           eager_load_via_application!
@@ -51,7 +51,7 @@ module Rails
 
         def eager_load_via_application!
           ::Rails.application.eager_load!
-        rescue StandardError => e
+        rescue StandardError, LoadError => e
           warn "[rails-schema] eager_load! failed (#{e.class}: #{e.message}), " \
                "falling back to per-file model loading"
           eager_load_model_files!
@@ -65,7 +65,7 @@ module Rails
 
           Dir.glob(models_path.join("**/*.rb")).sort.each do |file|
             require file
-          rescue StandardError => e
+          rescue StandardError, LoadError => e
             warn "[rails-schema] Could not load #{file}: #{e.class}: #{e.message}"
           end
         end
