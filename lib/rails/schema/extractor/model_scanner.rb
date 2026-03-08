@@ -6,7 +6,7 @@ module Rails
       class ModelScanner
         def initialize(configuration: ::Rails::Schema.configuration, schema_data: nil)
           @configuration = configuration
-          @schema_data = schema_data
+          @schema_data = schema_data.nil? || schema_data.empty? ? nil : schema_data
         end
 
         def scan
@@ -43,7 +43,7 @@ module Rails
           else
             loader.eager_load
           end
-        rescue StandardError => e
+        rescue StandardError, LoadError => e
           warn "[rails-schema] Zeitwerk eager_load failed (#{e.class}: #{e.message}), " \
                "trying Rails.application.eager_load!"
           eager_load_via_application!
@@ -51,7 +51,7 @@ module Rails
 
         def eager_load_via_application!
           ::Rails.application.eager_load!
-        rescue StandardError => e
+        rescue StandardError, LoadError => e
           warn "[rails-schema] eager_load! failed (#{e.class}: #{e.message}), " \
                "falling back to per-file model loading"
           eager_load_model_files!
@@ -63,9 +63,9 @@ module Rails
           models_path = ::Rails.root.join("app", "models")
           return unless models_path.exist?
 
-          Dir.glob(models_path.join("**/*.rb")).each do |file|
+          Dir.glob(models_path.join("**/*.rb")).sort.each do |file|
             require file
-          rescue StandardError => e
+          rescue StandardError, LoadError => e
             warn "[rails-schema] Could not load #{file}: #{e.class}: #{e.message}"
           end
         end

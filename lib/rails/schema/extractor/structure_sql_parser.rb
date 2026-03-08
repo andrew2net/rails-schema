@@ -19,9 +19,9 @@ module Rails
         }.freeze
 
         COMPOUND_TYPE_RE = /\A(character\s+varying|bit\s+varying|double\s+precision|
-                               timestamp(?:\(\d+\))?\s+with(?:out)?\s+time\s+zone)/ix
-        CONSTRAINT_RE = /\A(CONSTRAINT|UNIQUE|CHECK|EXCLUDE|FOREIGN\s+KEY)\b/i
-        PK_CONSTRAINT_RE = /PRIMARY\s+KEY\s*\(([^)]+)\)/i
+                               timestamp(?:\(\d+\))?\s+with(?:out)?\s+time\s+zone)/ix.freeze
+        CONSTRAINT_RE = /\A(CONSTRAINT|UNIQUE|CHECK|EXCLUDE|FOREIGN\s+KEY)\b/i.freeze
+        PK_CONSTRAINT_RE = /PRIMARY\s+KEY\s*\(([^)]+)\)/i.freeze
 
         def initialize(structure_path = nil)
           @structure_path = structure_path
@@ -56,7 +56,9 @@ module Rails
           File.join(Dir.pwd, "db", "structure.sql")
         end
 
-        def unquote(identifier) = identifier.delete('"')
+        def unquote(identifier)
+          identifier.delete('"')
+        end
 
         def extract_table_name(raw)
           unquote(raw).split(".").last

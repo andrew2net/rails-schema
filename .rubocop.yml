@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 3.2
+  TargetRubyVersion: 2.7
   NewCops: enable
   SuggestExtensions: false
 
@@ -23,6 +23,10 @@ Style/OneClassPerFile:
 
 Metrics/ParameterLists:
   Max: 7
+
+Metrics/ClassLength:
+  Exclude:
+    - "lib/rails/schema/extractor/structure_sql_parser.rb"
 
 Metrics/MethodLength:
   Max: 15

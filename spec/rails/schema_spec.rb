@@ -249,5 +249,15 @@ RSpec.describe Rails::Schema do
         expect(Rails::Schema::Extractor::ModelScanner).to have_received(:new).with(schema_data: sql_data)
       end
     end
+
+    context "when both parsers return empty hashes" do
+      let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: {}) }
+      let(:sql_parser) { instance_double(Rails::Schema::Extractor::StructureSqlParser, parse: {}) }
+
+      before do
+        Rails::Schema.configure { |c| c.schema_format = :auto }
+        hide_const("Mongoid::Document")
+      end
+    end
   end
 end
