@@ -4,6 +4,13 @@ Interactive HTML visualization of your Rails database schema. Introspects your a
 
 No external server, no CDN — just one command and a browser.
 
+## Compatibility
+
+| Dependency | Required version |
+|-----------|-----------------|
+| Ruby | >= 2.7 |
+| Rails | >= 5.2 |
+
 **[Live example](https://andrew2net.github.io/rails-schema/)** — generated from [Fizzy](https://www.fizzy.do), a modern spin on kanban for tracking just about anything, created by [37signals](https://37signals.com).
 
 ![Rails Schema screenshot](docs/screenshot.png)

@@ -186,14 +186,25 @@ RSpec.describe Rails::Schema::Extractor::ModelScanner do
       end
     end
 
+    context "with empty schema_data" do
+      it "falls back to table_exists? instead of rejecting all models" do
+        scanner = described_class.new(schema_data: {})
+        models = scanner.scan
+        model_names = models.map(&:name)
+
+        expect(model_names).to include("User", "Post", "Comment", "Tag")
+      end
+    end
+
     context "when no models survive filtering" do
       it "logs diagnostic counts" do
         mock_model = class_double("ActiveRecord::Base", name: "BrokenModel",
                                                         abstract_class?: false,
                                                         table_name: "broken_models")
+        allow(mock_model).to receive(:table_exists?).and_return(false)
         allow(ActiveRecord::Base).to receive(:descendants).and_return([mock_model])
 
-        scanner = described_class.new(schema_data: {})
+        scanner = described_class.new
 
         expect { scanner.scan }.to output(
           /No models found! Filtering: 1 descendants → 1 concrete → 1 named → 0 with tables/
