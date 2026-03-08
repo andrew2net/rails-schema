@@ -249,5 +249,34 @@ RSpec.describe Rails::Schema do
         expect(Rails::Schema::Extractor::ModelScanner).to have_received(:new).with(schema_data: sql_data)
       end
     end
+
+    context "when both parsers return empty hashes" do
+      let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: {}) }
+      let(:sql_parser) { instance_double(Rails::Schema::Extractor::StructureSqlParser, parse: {}) }
+
+      before do
+        Rails::Schema.configure { |c| c.schema_format = :auto }
+        hide_const("Mongoid::Document")
+      end
+
+      it "passes nil schema_data so models fall back to runtime introspection" do
+        Rails::Schema.generate
+
+        expect(Rails::Schema::Extractor::ModelScanner).to have_received(:new).with(schema_data: nil)
+        expect(Rails::Schema::Extractor::ColumnReader).to have_received(:new).with(schema_data: nil)
+      end
+    end
+
+    context "when schema_format is :ruby and parser returns empty hash" do
+      let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: {}) }
+
+      before { Rails::Schema.configure { |c| c.schema_format = :ruby } }
+
+      it "passes nil schema_data" do
+        Rails::Schema.generate
+
+        expect(Rails::Schema::Extractor::ModelScanner).to have_received(:new).with(schema_data: nil)
+      end
+    end
   end
 end

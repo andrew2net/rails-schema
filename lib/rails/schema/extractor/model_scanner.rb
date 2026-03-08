@@ -6,7 +6,7 @@ module Rails
       class ModelScanner
         def initialize(configuration: ::Rails::Schema.configuration, schema_data: nil)
           @configuration = configuration
-          @schema_data = schema_data
+          @schema_data = schema_data.nil? || schema_data.empty? ? nil : schema_data
         end
 
         def scan

@@ -12,3 +12,5 @@
 .claude/
 .vscode/
 Gemfile.lock
+samples/
+.tool-versions
