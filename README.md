@@ -107,7 +107,7 @@ For Mongoid apps, the gem introspects model classes at runtime to read field def
 ## Features
 
 - **No database required** — reads from `db/schema.rb`, `db/structure.sql`, or Mongoid model introspection
-- **Force-directed layout** — models cluster naturally by association density
+- **Force-directed layout** — models cluster naturally by association density; self-referential-only models are placed in a left column, true orphans in rows above
 - **Searchable sidebar** — filter models by name or table
 - **Click-to-focus** — click a model to highlight its neighborhood, fading unrelated models
 - **Detail panel** — full column list and associations for the selected model
