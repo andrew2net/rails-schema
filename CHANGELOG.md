@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.4] - 2026-03-08
+
+### Added
+
+- Support for Ruby 2.7+ and Rails 5.2+ (improved compatibility with older versions)
+
+### Changed
+
+- Self-referential-only models (all edges point to themselves) are now placed in a vertical column to the left of the main graph instead of floating in the force simulation
+- True orphan models (zero edges) continue to appear in rows above the diagram
+- Improved class names and table names visibility
+
 ## [0.1.3] - 2026-03-01
 
 ### Added
