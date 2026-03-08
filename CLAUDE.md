@@ -104,3 +104,4 @@ Single self-contained HTML file — no CDN, no network requests. D3 is vendored/
 - **Not a mounted engine** — static file works without a running server
 - **Parse schema files** — works without DB connection (CI environments, no local DB)
 - **Force-directed layout** — handles unknown schemas gracefully without pre-defined positions
+- **Node layout categories** — three-way partition in `app.js`: connected nodes use force simulation, self-ref-only models (all edges point to themselves) are placed in a vertical left column via `layoutSelfRefNodes()`, true orphans (zero edges) are placed in rows above the diagram via `layoutOrphans()`
