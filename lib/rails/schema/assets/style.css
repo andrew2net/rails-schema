@@ -346,6 +346,14 @@ body {
   pointer-events: none;
 }
 
+.edge-label.belongs_to { fill: var(--edge-belongs-to); }
+.edge-label.has_many { fill: var(--edge-has-many); }
+.edge-label.has_one { fill: var(--edge-has-one); }
+.edge-label.has_and_belongs_to_many { fill: var(--edge-habtm); }
+.edge-label.embeds_many { fill: var(--edge-embeds-many); }
+.edge-label.embeds_one { fill: var(--edge-embeds-one); }
+.edge-label.embedded_in { fill: var(--edge-embedded-in); }
+
 .edge-label-bg {
   fill: var(--bg-primary);
   opacity: 0.85;
