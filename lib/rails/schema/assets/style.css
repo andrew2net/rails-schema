@@ -438,6 +438,10 @@ body {
 .column-list .col-name {
   font-family: "SF Mono", "Fira Code", monospace;
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .column-list .col-name.pk {
@@ -448,6 +452,8 @@ body {
   color: var(--text-muted);
   font-family: "SF Mono", "Fira Code", monospace;
   font-size: 11px;
+  flex-shrink: 0;
+  margin-left: 8px;
 }
 
 .assoc-list {
