@@ -99,7 +99,7 @@ body {
 #toolbar {
   position: fixed;
   top: 0;
-  left: var(--sidebar-width);
+  left: 0;
   right: 0;
   height: var(--toolbar-height);
   background: var(--bg-secondary);
@@ -108,7 +108,7 @@ body {
   align-items: center;
   padding: 0 16px;
   gap: 8px;
-  z-index: 100;
+  z-index: 200;
 }
 
 #toolbar button {
@@ -135,6 +135,13 @@ body {
   text-align: center;
 }
 
+.toolbar-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-color);
+  margin: 0 4px;
+}
+
 #toolbar .shortcuts-hint {
   font-size: 11px;
   color: var(--text-muted);
@@ -148,7 +155,8 @@ body {
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  margin-top: var(--toolbar-height);
+  height: calc(100vh - var(--toolbar-height));
   z-index: 101;
 }
 
