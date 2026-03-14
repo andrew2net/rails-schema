@@ -115,6 +115,7 @@ For Mongoid apps, the gem introspects model classes at runtime to read field def
 - **Dark/light theme** — toggle or auto-detect from system preference
 - **Zoom & pan** — scroll wheel, pinch, or buttons
 - **Keyboard shortcuts** — `/` search, `Esc` deselect, `+/-` zoom, `F` fit to screen
+- **Export to Mermaid** — download the diagram as a `.mmd` file for use in Markdown, GitHub, or other tools that render Mermaid ER diagrams; respects sidebar visibility filters so you can export a subset of models
 - **Self-contained** — single HTML file with all CSS, JS, and data inlined
 
 ## License
