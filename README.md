@@ -110,6 +110,7 @@ For Mongoid apps, the gem introspects model classes at runtime to read field def
 - **Force-directed layout** — models cluster naturally by association density; self-referential-only models are placed in a left column, true orphans in rows above
 - **Searchable sidebar** — filter models by name or table
 - **Click-to-focus** — click a model to highlight its neighborhood, fading unrelated models
+- **Double-click to isolate** — double-click a model to filter the view to only that model and its direct neighbors
 - **Detail panel** — full column list and associations for the selected model
 - **Dark/light theme** — toggle or auto-detect from system preference
 - **Zoom & pan** — scroll wheel, pinch, or buttons
