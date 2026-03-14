@@ -96,7 +96,7 @@ Single self-contained HTML file — no CDN, no network requests. D3 is vendored/
 
 - **Vanilla JS + d3-force** for graph rendering
 - **CSS custom properties** for dark/light theming
-- Features: searchable sidebar, click-to-focus, detail panel, zoom/pan, keyboard shortcuts (`/` search, `Esc` deselect, `+/-` zoom, `F` fit)
+- Features: searchable sidebar, click-to-focus, double-click to isolate neighborhood, detail panel, zoom/pan, keyboard shortcuts (`/` search, `Esc` deselect, `+/-` zoom, `F` fit)
 
 ## Design Decisions
 
