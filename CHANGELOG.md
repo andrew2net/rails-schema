@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.5] - 2026-03-14
+
+### Added
+
+- `exclude_model_if` configuration option: provide a proc/lambda to dynamically exclude models based on arbitrary conditions, works with both ActiveRecord and Mongoid pipelines (#16)
+- Mermaid ER diagram export (`.mmd`) — respects sidebar visibility filters so you can export a subset of models (#23)
+- Double-click a model node to isolate its neighborhood (#20)
+- Shift-click range selection for sidebar checkboxes (#24)
+- Smart "Select All" toggle — when all models are selected and a search filter is active, narrows to only filtered models (#24)
+- Search clear button in the sidebar (#24)
+- Color-coded edge labels by association type (#19)
+
+### Changed
+
+- Refactored text measurement and truncation functions for cleaner rendering
+
 ## [0.1.4] - 2026-03-08
 
 ### Added
