@@ -23,6 +23,29 @@ RSpec.describe Rails::Schema::Extractor::ModelScanner do
       expect(model_names).to include("Post")
     end
 
+    it "excludes models matching exclude_model_if proc" do
+      Rails::Schema.configure { |c| c.exclude_model_if = ->(model) { model.name.start_with?("U") } }
+
+      models = described_class.new.scan
+      model_names = models.map(&:name)
+
+      expect(model_names).not_to include("User")
+      expect(model_names).to include("Post", "Comment")
+    end
+
+    it "applies both exclude_models and exclude_model_if" do
+      Rails::Schema.configure do |c|
+        c.exclude_models = ["Tag"]
+        c.exclude_model_if = ->(model) { model.name == "Comment" }
+      end
+
+      models = described_class.new.scan
+      model_names = models.map(&:name)
+
+      expect(model_names).not_to include("Tag", "Comment")
+      expect(model_names).to include("User", "Post")
+    end
+
     it "excludes models matching wildcard prefix" do
       # Since our test models don't use namespaces, test with exact match behavior
       Rails::Schema.configure { |c| c.exclude_models = ["Comment"] }

@@ -61,6 +61,7 @@ Rails::Schema.configure do |config|
     "ActiveStorage::Attachment",
     "ActionMailbox::*"           # wildcard prefix matching
   ]
+  config.exclude_model_if = ->(model) { model.table_name.start_with?("_") }
 end
 ```
 
@@ -72,6 +73,7 @@ end
 | `expand_columns` | `false` | Whether model nodes start with columns expanded |
 | `schema_format` | `:auto` | Schema source — `:auto`, `:ruby`, `:sql`, or `:mongoid` (see below) |
 | `exclude_models` | `[]` | Models to hide; supports exact names and wildcard prefixes (`"ActionMailbox::*"`) |
+| `exclude_model_if` | `nil` | A proc/lambda that receives a model class and returns `true` to exclude it |
 
 ### Schema format
 

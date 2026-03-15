@@ -44,6 +44,27 @@ RSpec.describe Rails::Schema::Extractor::Mongoid::ModelScanner do
       expect(names).to include("MongoidUser", "MongoidPost")
     end
 
+    it "excludes models matching exclude_model_if proc" do
+      configuration.exclude_model_if = ->(model) { model.name.start_with?("MongoidC") }
+
+      result = scanner.scan
+
+      names = result.map(&:name)
+      expect(names).not_to include("MongoidComment")
+      expect(names).to include("MongoidUser", "MongoidPost")
+    end
+
+    it "applies both exclude_models and exclude_model_if" do
+      configuration.exclude_models = ["MongoidUser"]
+      configuration.exclude_model_if = ->(model) { model.name == "MongoidPost" }
+
+      result = scanner.scan
+
+      names = result.map(&:name)
+      expect(names).not_to include("MongoidUser", "MongoidPost")
+      expect(names).to include("MongoidComment")
+    end
+
     it "skips classes without a name" do
       anonymous = Class.new { include Mongoid::Document }
 
