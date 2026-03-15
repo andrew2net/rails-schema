@@ -52,6 +52,30 @@ RSpec.describe Rails::Schema::Transformer::GraphBuilder do
       expect(edge).not_to be_nil
       expect(edge[:association_type]).to eq("has_many")
     end
+
+    it "deduplicates has_many/belongs_to edges into a single edge with both labels" do
+      edge = result[:edges].find { |e| e[:from] == "User" && e[:to] == "Post" && e[:association_type] == "has_many" }
+
+      expect(edge).not_to be_nil
+      expect(edge[:label]).to eq("posts")
+      expect(edge[:reverse_label]).to eq("user")
+      expect(edge[:reverse_association_type]).to eq("belongs_to")
+
+      bt_edges = result[:edges].select { |e| e[:from] == "Post" && e[:to] == "User" && e[:association_type] == "belongs_to" }
+      expect(bt_edges).to be_empty
+    end
+
+    it "deduplicates HABTM edges between Post and Tag into a single edge with both labels" do
+      habtm_edges = result[:edges].select do |e|
+        e[:association_type] == "has_and_belongs_to_many" &&
+          [e[:from], e[:to]].sort == %w[Post Tag]
+      end
+
+      expect(habtm_edges.length).to eq(1)
+      edge = habtm_edges.first
+      expect(edge[:label]).to eq("tags")
+      expect(edge[:reverse_label]).to eq("posts")
+    end
   end
 
   describe "#build with duplicate model names" do

@@ -13,11 +13,10 @@ module Rails
 
         def build(models)
           model_ids = assign_unique_ids(models)
-          name_to_id = {}
-          model_ids.each { |m, uid| name_to_id[m.name] ||= uid }
+          name_to_id = build_name_to_id(model_ids)
 
           nodes = model_ids.map { |m, uid| build_node(m, uid) }
-          edges = model_ids.flat_map { |m, uid| build_edges(m, uid, name_to_id) }
+          edges = deduplicate_edges(model_ids.flat_map { |m, uid| build_edges(m, uid, name_to_id) })
 
           {
             nodes: nodes.map(&:to_h),
@@ -27,6 +26,10 @@ module Rails
         end
 
         private
+
+        def build_name_to_id(model_ids)
+          model_ids.each_with_object({}) { |(m, uid), map| map[m.name] ||= uid }
+        end
 
         def assign_unique_ids(models)
           counts = models.group_by(&:name).transform_values(&:size)
@@ -57,6 +60,51 @@ module Rails
               through: assoc[:through],
               polymorphic: assoc[:polymorphic]
             )
+          end
+        end
+
+        def deduplicate_edges(edges)
+          edges = deduplicate_habtm(edges)
+          deduplicate_has_many_belongs_to(edges)
+        end
+
+        def deduplicate_habtm(edges)
+          habtm_first = {}
+
+          edges.each_with_object([]) do |edge, result|
+            next result << edge unless edge.association_type == "has_and_belongs_to_many"
+
+            pair = [edge.from, edge.to].sort
+            if habtm_first.key?(pair)
+              habtm_first[pair].reverse_label = edge.label
+            else
+              habtm_first[pair] = edge
+              result << edge
+            end
+          end
+        end
+
+        def deduplicate_has_many_belongs_to(edges)
+          hm_lookup = build_has_many_lookup(edges)
+
+          edges.each_with_object([]) do |edge, result|
+            if edge.association_type == "belongs_to"
+              hm_edge = hm_lookup[[edge.from, edge.to, edge.foreign_key]]
+              if hm_edge
+                hm_edge.reverse_label = edge.label
+                hm_edge.reverse_association_type = edge.association_type
+                next
+              end
+            end
+            result << edge
+          end
+        end
+
+        def build_has_many_lookup(edges)
+          edges.each_with_object({}) do |edge, lookup|
+            next unless %w[has_many has_one].include?(edge.association_type)
+
+            lookup[[edge.to, edge.from, edge.foreign_key]] = edge
           end
         end
 
