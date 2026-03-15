@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Smart "Select All" toggle — when all models are selected and a search filter is active, narrows to only filtered models (#24)
 - Search clear button in the sidebar (#24)
 - Color-coded edge labels by association type (#19)
+- Edge deduplication for `has_many`/`belongs_to` pairs — reciprocal associations are merged into a single edge with dual labels, each colored by its own association type
 
 ### Changed
 

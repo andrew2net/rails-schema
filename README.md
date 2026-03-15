@@ -120,6 +120,7 @@ For Mongoid apps, the gem introspects model classes at runtime to read field def
 - **Zoom & pan** — scroll wheel, pinch, or buttons
 - **Keyboard shortcuts** — `/` search, `Esc` deselect, `+/-` zoom, `F` fit to screen
 - **Export to Mermaid** — download the diagram as a `.mmd` file for use in Markdown, GitHub, or other tools that render Mermaid ER diagrams; respects sidebar visibility filters so you can export a subset of models
+- **Deduplicated edges** — reciprocal associations (e.g. `has_many :posts` / `belongs_to :user`, or symmetric HABTM) are merged into a single edge with dual labels, each colored by its own association type
 - **Self-contained** — single HTML file with all CSS, JS, and data inlined
 
 ## License
