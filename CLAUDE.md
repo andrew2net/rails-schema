@@ -97,6 +97,7 @@ Single self-contained HTML file — no CDN, no network requests. D3 is vendored/
 - **Vanilla JS + d3-force** for graph rendering
 - **CSS custom properties** for dark/light theming
 - Features: searchable sidebar, click-to-focus, double-click to isolate neighborhood, detail panel, zoom/pan, keyboard shortcuts (`/` search, `Esc` deselect, `+/-` zoom, `F` fit), Mermaid ER diagram export (`.mmd`) filtered by sidebar visibility
+- **Select All smart toggle** — when all models are already selected and a search filter is active, "Select All" narrows to only filtered models (acts as "select only these"); otherwise it adds filtered models to the current selection
 
 ## Design Decisions
 
