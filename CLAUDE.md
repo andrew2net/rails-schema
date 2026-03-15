@@ -57,7 +57,7 @@ end
 1. Calls `Rails.application.eager_load!` (Zeitwerk support, multiple fallback strategies including `LoadError` rescue)
 2. Collects `ActiveRecord::Base.descendants`
 3. Filters: abstract classes, anonymous classes, models without known tables
-4. Applies `exclude_models` config (supports wildcard prefix like `"ActiveStorage::*"`)
+4. Applies `exclude_models` config (supports wildcard prefix like `"ActiveStorage::*"`) and `exclude_model_if` proc
 
 `Mongoid::ModelScanner`:
 1. Eager-loads via Zeitwerk or file glob with fallbacks

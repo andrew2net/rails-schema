@@ -27,9 +27,14 @@ RSpec.describe Rails::Schema::Configuration do
     expect(config.schema_format).to eq(:auto)
   end
 
+  it "has default exclude_model_if" do
+    expect(config.exclude_model_if).to be_nil
+  end
+
   it "allows setting attributes" do
     config.output_path = "custom/path.html"
     config.exclude_models = ["User"]
+    config.exclude_model_if = ->(model) { model.name == "Post" }
     config.title = "My Schema"
     config.theme = :dark
     config.expand_columns = true
@@ -37,6 +42,7 @@ RSpec.describe Rails::Schema::Configuration do
 
     expect(config.output_path).to eq("custom/path.html")
     expect(config.exclude_models).to eq(["User"])
+    expect(config.exclude_model_if).to be_a(Proc)
     expect(config.title).to eq("My Schema")
     expect(config.theme).to eq(:dark)
     expect(config.expand_columns).to eq(true)

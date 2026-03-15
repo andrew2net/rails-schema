@@ -86,6 +86,8 @@ module Rails
         end
 
         def excluded?(model)
+          return true if @configuration.exclude_model_if&.call(model)
+
           @configuration.exclude_models.any? do |pattern|
             if pattern.end_with?("*")
               model.name.start_with?(pattern.delete_suffix("*"))
