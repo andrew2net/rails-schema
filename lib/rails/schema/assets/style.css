@@ -171,15 +171,39 @@ body {
   margin-bottom: 12px;
 }
 
+#search-wrapper {
+  position: relative;
+}
+
 #search-input {
   width: 100%;
-  padding: 8px 12px;
+  padding: 8px 28px 8px 12px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   background: var(--bg-primary);
   color: var(--text-primary);
   font-size: 13px;
   outline: none;
+  box-sizing: border-box;
+}
+
+#search-clear {
+  position: absolute;
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 6px;
+  line-height: 1;
+  display: none;
+}
+
+#search-clear:hover {
+  color: var(--text-primary);
 }
 
 #search-input:focus {
