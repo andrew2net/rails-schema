@@ -123,6 +123,10 @@ For Mongoid apps, the gem introspects model classes at runtime to read field def
 - **Deduplicated edges** — reciprocal associations (e.g. `has_many :posts` / `belongs_to :user`, or symmetric HABTM) are merged into a single edge with dual labels, each colored by its own association type
 - **Self-contained** — single HTML file with all CSS, JS, and data inlined
 
+## Support
+
+If you find this gem useful, consider [buying me a coffee](https://www.paypal.com/donate/?hosted_button_id=5PZC9UEJWFJYJ).
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
