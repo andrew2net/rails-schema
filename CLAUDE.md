@@ -71,7 +71,7 @@ end
 - Double quotes for strings (RuboCop enforced)
 - RuboCop max method length: 15 lines, default ABC/complexity limits
 - No `Style/Documentation` required
-- `spec/support/test_models.rb` — ActiveRecord test models (User, Post, Comment, Tag)
+- `spec/support/test_models.rb` — ActiveRecord test models (User, Post, Comment, Tag, Admin::Dashboard, Admin::Reports::Summary)
 - `spec/support/mongoid_test_models.rb` — Mongoid test models (MongoidUser, MongoidPost, MongoidComment)
 - Tests use in-memory SQLite for ActiveRecord, stubbed Mongoid::Document for Mongoid
 - `config.before(:each) { Rails::Schema.reset_configuration! }` in spec_helper
@@ -98,6 +98,7 @@ Single self-contained HTML file — no CDN, no network requests. D3 is vendored/
 - **CSS custom properties** for dark/light theming
 - Features: searchable sidebar, click-to-focus, double-click to isolate neighborhood, detail panel, zoom/pan, keyboard shortcuts (`/` search, `Esc` deselect, `+/-` zoom, `F` fit), Mermaid ER diagram export (`.mmd`) filtered by sidebar visibility
 - **Select All smart toggle** — when all models are already selected and a search filter is active, "Select All" narrows to only filtered models (acts as "select only these"); otherwise it adds filtered models to the current selection
+- **Model grouping** — when `config.model_schema_group` is set, models are organized under collapsible group headers in the sidebar with color-coded dots; each group's models get a distinct node header color in the SVG; a custom d3 force (`strength 0.15`) pulls same-group nodes toward their centroid, and a separation force pushes overlapping group bounding boxes apart; double-click a group header to select/deselect (uses delayed click timer to avoid triggering collapse); search also matches group names
 
 ## Design Decisions
 
@@ -107,3 +108,4 @@ Single self-contained HTML file — no CDN, no network requests. D3 is vendored/
 - **Force-directed layout** — handles unknown schemas gracefully without pre-defined positions
 - **Node layout categories** — three-way partition in `app.js`: connected nodes use force simulation, self-ref-only models (all edges point to themselves) are placed in a vertical left column via `layoutSelfRefNodes()`, true orphans (zero edges) are placed in rows above the diagram via `layoutOrphans()`
 - **Edge deduplication** — `GraphBuilder.deduplicate_edges` chains two passes: (1) HABTM dedup merges symmetric `has_and_belongs_to_many` pairs into one edge with `reverse_label`, (2) has_many/belongs_to dedup merges matching pairs (same foreign_key, reversed endpoints) into one edge where the has_many/has_one side is kept and the belongs_to label becomes `reverse_label` with its own `reverse_association_type`. The frontend uses `reverse_association_type` to color each label by its own association type.
+- **Model grouping config** — `config.model_schema_group` accepts `nil` (default, no grouping), `:namespaces` (splits `model.name` on `::`, drops the model name, keeps namespace parts), or a custom `Proc` that receives a model and returns an array (e.g., `["Admin", "Reports"]`). `Configuration#resolved_group_proc` normalizes all forms into a callable proc. `GraphBuilder` calls it per model and attaches the result as `Node#group`. The `group` field is omitted from JSON when empty to keep output compact when grouping is off.

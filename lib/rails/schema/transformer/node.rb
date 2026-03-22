@@ -4,20 +4,19 @@ module Rails
   module Schema
     module Transformer
       class Node
-        attr_reader :id, :table_name, :columns
+        attr_reader :id, :table_name, :columns, :group
 
-        def initialize(id:, table_name:, columns: [])
+        def initialize(id:, table_name:, columns: [], group: [])
           @id = id
           @table_name = table_name
           @columns = columns
+          @group = group
         end
 
         def to_h
-          {
-            id: @id,
-            table_name: @table_name,
-            columns: @columns
-          }
+          h = { id: @id, table_name: @table_name, columns: @columns }
+          h[:group] = @group unless @group.empty?
+          h
         end
       end
     end

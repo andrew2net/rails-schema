@@ -78,6 +78,94 @@ RSpec.describe Rails::Schema::Transformer::GraphBuilder do
     end
   end
 
+  describe "#build with grouping" do
+    let(:models_with_namespaces) { [User, Post, Admin::Dashboard, Admin::Reports::Summary] }
+
+    context "when model_schema_group is nil" do
+      it "does not include group key in nodes" do
+        result = builder.build(models)
+        user_node = result[:nodes].find { |n| n[:id] == "User" }
+
+        expect(user_node).not_to have_key(:group)
+      end
+    end
+
+    context "when model_schema_group is :namespaces" do
+      before do
+        Rails::Schema.configure { |c| c.model_schema_group = :namespaces }
+      end
+
+      let(:builder) { described_class.new }
+
+      it "assigns namespace groups to namespaced models" do
+        result = builder.build(models_with_namespaces)
+        dashboard_node = result[:nodes].find { |n| n[:id] == "Admin::Dashboard" }
+        summary_node = result[:nodes].find { |n| n[:id] == "Admin::Reports::Summary" }
+
+        expect(dashboard_node[:group]).to eq(["Admin"])
+        expect(summary_node[:group]).to eq(%w[Admin Reports])
+      end
+
+      it "omits group for non-namespaced models" do
+        result = builder.build(models_with_namespaces)
+        user_node = result[:nodes].find { |n| n[:id] == "User" }
+
+        expect(user_node).not_to have_key(:group)
+      end
+    end
+
+    context "when model_schema_group is a custom Proc" do
+      before do
+        Rails::Schema.configure do |c|
+          c.model_schema_group = ->(model) { ["Custom"] }
+        end
+      end
+
+      let(:builder) { described_class.new }
+
+      it "uses the custom proc result" do
+        result = builder.build(models)
+        user_node = result[:nodes].find { |n| n[:id] == "User" }
+
+        expect(user_node[:group]).to eq(["Custom"])
+      end
+    end
+
+    context "when proc returns nil" do
+      before do
+        Rails::Schema.configure do |c|
+          c.model_schema_group = ->(_model) { nil }
+        end
+      end
+
+      let(:builder) { described_class.new }
+
+      it "treats nil as empty array and omits group" do
+        result = builder.build(models)
+        user_node = result[:nodes].find { |n| n[:id] == "User" }
+
+        expect(user_node).not_to have_key(:group)
+      end
+    end
+
+    context "when proc returns a string" do
+      before do
+        Rails::Schema.configure do |c|
+          c.model_schema_group = ->(_model) { "FlatGroup" }
+        end
+      end
+
+      let(:builder) { described_class.new }
+
+      it "wraps string in an array" do
+        result = builder.build(models)
+        user_node = result[:nodes].find { |n| n[:id] == "User" }
+
+        expect(user_node[:group]).to eq(["FlatGroup"])
+      end
+    end
+  end
+
   describe "#build with duplicate model names" do
     let(:dup_model_a) do
       double("DupModelA", name: "HABTM_Things", table_name: "things_roles")

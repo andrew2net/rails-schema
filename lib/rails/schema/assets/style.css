@@ -591,3 +591,42 @@ body {
   );
   background-color: transparent;
 }
+
+/* Sidebar group headers */
+.group-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  user-select: none;
+  gap: 6px;
+}
+
+.group-header:hover {
+  background: var(--bg-tertiary);
+}
+
+.group-toggle {
+  font-size: 10px;
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.group-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.group-header-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

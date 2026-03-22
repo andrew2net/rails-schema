@@ -6,9 +6,11 @@ module Rails
   module Schema
     module Transformer
       class GraphBuilder
-        def initialize(column_reader: Extractor::ColumnReader.new, association_reader: Extractor::AssociationReader.new)
+        def initialize(column_reader: Extractor::ColumnReader.new, association_reader: Extractor::AssociationReader.new,
+                       configuration: ::Rails::Schema.configuration)
           @column_reader = column_reader
           @association_reader = association_reader
+          @group_proc = configuration.resolved_group_proc
         end
 
         def build(models)
@@ -40,10 +42,12 @@ module Rails
         end
 
         def build_node(model, unique_id)
+          group = @group_proc ? Array(@group_proc.call(model)) : []
           Node.new(
             id: unique_id,
             table_name: model.table_name,
-            columns: @column_reader.read(model)
+            columns: @column_reader.read(model),
+            group: group
           )
         end
 
