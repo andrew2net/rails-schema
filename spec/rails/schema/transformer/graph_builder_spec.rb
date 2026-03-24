@@ -119,7 +119,7 @@ RSpec.describe Rails::Schema::Transformer::GraphBuilder do
     context "when model_schema_group is a custom Proc" do
       before do
         Rails::Schema.configure do |c|
-          c.model_schema_group = ->(model) { ["Custom"] }
+          c.model_schema_group = ->(_model) { ["Custom"] }
         end
       end
 
@@ -136,7 +136,7 @@ RSpec.describe Rails::Schema::Transformer::GraphBuilder do
     context "when proc returns nil" do
       before do
         Rails::Schema.configure do |c|
-          c.model_schema_group = ->(_model) { nil }
+          c.model_schema_group = ->(_) {}
         end
       end
 
