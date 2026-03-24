@@ -95,6 +95,10 @@ RSpec.describe Rails::Schema::Extractor::ModelScanner do
         allow(Rails).to receive(:autoloaders).and_return(mock_old_autoloaders)
         allow(mock_app).to receive(:eager_load!)
 
+        mock_abstract = class_double("ActiveRecord::Base", name: "ApplicationRecord",
+                                                           abstract_class?: true)
+        allow(ActiveRecord::Base).to receive(:descendants).and_return([mock_abstract])
+
         scanner.scan
 
         expect(mock_loader).to have_received(:eager_load)
@@ -177,6 +181,100 @@ RSpec.describe Rails::Schema::Extractor::ModelScanner do
         expect(defined?(ZzzGoodModel)).to eq("constant")
       ensure
         Object.send(:remove_const, :ZzzGoodModel) if defined?(ZzzGoodModel)
+      end
+
+      it "falls back to full eager_load when app/models has no concrete models" do
+        allow(mock_autoloader).to receive(:eager_load_dir)
+        allow(mock_autoloader).to receive(:eager_load)
+
+        mock_abstract = class_double("ActiveRecord::Base", name: "ApplicationRecord",
+                                                           abstract_class?: true)
+        allow(ActiveRecord::Base).to receive(:descendants).and_return([mock_abstract])
+
+        scanner.scan
+
+        expect(mock_autoloader).to have_received(:eager_load_dir).with(tmp.join("app", "models").to_s)
+        expect(mock_autoloader).to have_received(:eager_load)
+      end
+
+      it "skips full eager_load when app/models has concrete models" do
+        allow(mock_autoloader).to receive(:eager_load_dir)
+        allow(mock_autoloader).to receive(:eager_load)
+        allow(mock_app).to receive(:eager_load!)
+
+        scanner.scan
+
+        expect(mock_autoloader).to have_received(:eager_load_dir).with(tmp.join("app", "models").to_s)
+        expect(mock_autoloader).not_to have_received(:eager_load)
+      end
+
+      it "discovers model dirs from packwerk.yml package_paths" do
+        # Create packwerk.yml
+        File.write(tmp.join("packwerk.yml"), "package_paths:\n  - \".\"\n  - \"packages/*\"\n")
+
+        # Create packages with package.yml
+        pkg_accounts = tmp.join("packages", "accounts")
+        FileUtils.mkdir_p(pkg_accounts.join("app", "models"))
+        FileUtils.mkdir_p(pkg_accounts.join("app", "public"))
+        File.write(pkg_accounts.join("package.yml"), "enforce_dependencies: true\n")
+
+        # Root package.yml
+        File.write(tmp.join("package.yml"), "enforce_dependencies: false\n")
+
+        allow(mock_autoloader).to receive(:eager_load_dir)
+
+        scanner.scan
+
+        expect(mock_autoloader).to have_received(:eager_load_dir).with(pkg_accounts.join("app", "models").to_s)
+        expect(mock_autoloader).to have_received(:eager_load_dir).with(pkg_accounts.join("app", "public").to_s)
+        expect(mock_autoloader).to have_received(:eager_load_dir).with(tmp.join("app", "models").to_s)
+      end
+
+      it "skips package dirs without package.yml" do
+        File.write(tmp.join("packwerk.yml"), "package_paths:\n  - \"packages/*\"\n")
+
+        # Package WITH package.yml
+        pkg_good = tmp.join("packages", "good")
+        FileUtils.mkdir_p(pkg_good.join("app", "models"))
+        File.write(pkg_good.join("package.yml"), "enforce_dependencies: true\n")
+
+        # Directory WITHOUT package.yml
+        pkg_bad = tmp.join("packages", "not_a_package")
+        FileUtils.mkdir_p(pkg_bad.join("app", "models"))
+
+        allow(mock_autoloader).to receive(:eager_load_dir)
+
+        scanner.scan
+
+        expect(mock_autoloader).to have_received(:eager_load_dir).with(pkg_good.join("app", "models").to_s)
+        expect(mock_autoloader).not_to have_received(:eager_load_dir).with(pkg_bad.join("app", "models").to_s)
+      end
+
+      it "falls back to app/models when no packwerk.yml exists" do
+        # No packwerk.yml created
+        allow(mock_autoloader).to receive(:eager_load_dir)
+
+        scanner.scan
+
+        expect(mock_autoloader).to have_received(:eager_load_dir).with(tmp.join("app", "models").to_s)
+      end
+
+      it "loads packwerk model files in per-file fallback" do
+        allow(mock_autoloader).to receive(:eager_load_dir).and_raise(StandardError, "Zeitwerk error")
+        allow(mock_app).to receive(:eager_load!).and_raise(ActiveRecord::AdapterNotSpecified)
+
+        File.write(tmp.join("packwerk.yml"), "package_paths:\n  - \"packages/*\"\n")
+        pkg_models = tmp.join("packages", "core", "app", "models")
+        FileUtils.mkdir_p(pkg_models)
+        File.write(tmp.join("packages", "core", "package.yml"), "enforce_dependencies: true\n")
+        File.write(pkg_models.join("pkg_fallback_model.rb"),
+                   "class PkgFallbackModel < ActiveRecord::Base; self.abstract_class = true; end")
+
+        scanner.scan
+
+        expect(defined?(PkgFallbackModel)).to eq("constant")
+      ensure
+        Object.send(:remove_const, :PkgFallbackModel) if defined?(PkgFallbackModel)
       end
     end
 
