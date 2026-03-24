@@ -61,7 +61,9 @@ RSpec.describe Rails::Schema::Transformer::GraphBuilder do
       expect(edge[:reverse_label]).to eq("user")
       expect(edge[:reverse_association_type]).to eq("belongs_to")
 
-      bt_edges = result[:edges].select { |e| e[:from] == "Post" && e[:to] == "User" && e[:association_type] == "belongs_to" }
+      bt_edges = result[:edges].select do |e|
+        e[:from] == "Post" && e[:to] == "User" && e[:association_type] == "belongs_to"
+      end
       expect(bt_edges).to be_empty
     end
 
