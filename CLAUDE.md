@@ -18,7 +18,7 @@ Three-layer pipeline: **Extractor → Transformer → Renderer**
 
 | Layer | Responsibility | Key Classes |
 |---|---|---|
-| **Extractor** | Introspects Rails environment; collects models, columns, associations | `ModelScanner`, `ColumnReader`, `AssociationReader`, `SchemaFileParser`, `StructureSqlParser`, plus `Mongoid::ModelScanner`, `Mongoid::ModelAdapter`, `Mongoid::ColumnReader`, `Mongoid::AssociationReader` |
+| **Extractor** | Introspects Rails environment; collects models, columns, associations | `ModelScanner`, `PackwerkDiscovery`, `ColumnReader`, `AssociationReader`, `SchemaFileParser`, `StructureSqlParser`, plus `Mongoid::ModelScanner`, `Mongoid::ModelAdapter`, `Mongoid::ColumnReader`, `Mongoid::AssociationReader` |
 | **Transformer** | Normalizes extracted data into a serializable graph (nodes + edges + metadata) | `GraphBuilder`, `Node`, `Edge` |
 | **Renderer** | Injects graph data into an HTML/JS/CSS template via ERB | `HtmlGenerator` |
 | **Railtie** | Provides the `rails_schema:generate` rake task | `Railtie` |
@@ -54,10 +54,16 @@ end
 ### Model Discovery
 
 `ModelScanner` (ActiveRecord):
-1. Calls `Rails.application.eager_load!` (Zeitwerk support, multiple fallback strategies including `LoadError` rescue)
-2. Collects `ActiveRecord::Base.descendants`
-3. Filters: abstract classes, anonymous classes, models without known tables
-4. Applies `exclude_models` config (supports wildcard prefix like `"ActiveStorage::*"`) and `exclude_model_if` proc
+1. Discovers model directories: `app/models` + Packwerk package dirs via `PackwerkDiscovery`
+2. Eager-loads via Zeitwerk `eager_load_dir` for each model directory; falls back to `loader.eager_load` if no concrete models found, then `Rails.application.eager_load!`, then per-file `require`
+3. Collects `ActiveRecord::Base.descendants`
+4. Filters: abstract classes, anonymous classes, models without known tables
+5. Applies `exclude_models` config (supports wildcard prefix like `"ActiveStorage::*"`) and `exclude_model_if` proc
+
+`PackwerkDiscovery`:
+1. Reads `packwerk.yml` from `Rails.root` for `package_paths` glob patterns
+2. Finds directories with `package.yml` under those paths
+3. Returns `app/models` and `app/public` paths for each package
 
 `Mongoid::ModelScanner`:
 1. Eager-loads via Zeitwerk or file glob with fallbacks

@@ -106,6 +106,12 @@ The gem parses your `db/schema.rb` or `db/structure.sql` file to extract table a
 
 For Mongoid apps, the gem introspects model classes at runtime to read field definitions, associations, and validations — no schema file or database connection required.
 
+### Packwerk support
+
+If your app uses [Packwerk](https://github.com/Shopify/packwerk) for modular monolith architecture, rails-schema automatically discovers models inside packages. It reads your `packwerk.yml` to find `package_paths`, then looks for models in `app/models` and `app/public` under each package that has a `package.yml`. No configuration needed — it works out of the box.
+
+If the targeted loading doesn't find any models, the gem falls back to a full eager load of the entire application.
+
 ## Features
 
 - **No database required** — reads from `db/schema.rb`, `db/structure.sql`, or Mongoid model introspection
