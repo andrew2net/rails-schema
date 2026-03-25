@@ -63,6 +63,7 @@ Rails::Schema.configure do |config|
   ]
   config.exclude_model_if = ->(model) { model.table_name.start_with?("_") }
   config.model_schema_group = :namespaces  # group models by Ruby namespace
+  config.collapse_groups = true            # start with groups collapsed
 end
 ```
 
@@ -76,6 +77,7 @@ end
 | `exclude_models` | `[]` | Models to hide; supports exact names and wildcard prefixes (`"ActionMailbox::*"`) |
 | `exclude_model_if` | `nil` | A proc/lambda that receives a model class and returns `true` to exclude it |
 | `model_schema_group` | `nil` | Group models visually — `:namespaces`, or a custom proc (see below) |
+| `collapse_groups` | `true` | Whether sidebar groups start collapsed |
 
 ### Schema format
 
@@ -130,7 +132,17 @@ Rails::Schema.configure do |config|
 end
 ```
 
-Returning `["A", "B"]` means group "A" with subgroup "B". Returning `[]` or `nil` leaves the model ungrouped. Double-click a group header in the sidebar to select/deselect all models in that group.
+Returning `["A", "B"]` means group "A" with subgroup "B". Returning `[]` or `nil` leaves the model ungrouped.
+
+**Sidebar behavior with grouping enabled:**
+
+- Each group has a **checkbox** to select/deselect all models in the group (supports indeterminate state for partial selection)
+- **Double-click** a group header to isolate that group — selects only its models and deselects everything else
+- **Click** a group header to collapse/expand its model list
+- A **collapse/expand all** button (▼/▶) appears in the sidebar actions bar to toggle all groups at once
+- Model names are **color-coded** to match their group's color
+- The **group header highlights** when one of its models is selected on the diagram
+- Models in the same group **cluster together** in the force-directed layout
 
 ## How it works
 
@@ -147,7 +159,7 @@ If the targeted loading doesn't find any models, the gem falls back to a full ea
 ## Features
 
 - **No database required** — reads from `db/schema.rb`, `db/structure.sql`, or Mongoid model introspection
-- **Model grouping** — group models by namespace or custom logic; each group gets a distinct header color, collapsible sidebar sections, and double-click to select/deselect; grouped models cluster together in the force layout
+- **Model grouping** — group models by namespace or custom logic; each group gets a distinct color for node headers and sidebar model names, collapsible sidebar sections with checkboxes, a collapse/expand-all toggle, group header highlighting on model selection, and force-layout clustering
 - **Force-directed layout** — models cluster naturally by association density; self-referential-only models are placed in a left column, true orphans in rows above
 - **Searchable sidebar** — filter models by name or table, with a clear button to reset
 - **Select/Deselect All** — operates on filtered (visible) models only, so you can search and bulk-toggle a subset; when all models are selected and a search filter is active, "Select All" narrows the selection to only the filtered models
