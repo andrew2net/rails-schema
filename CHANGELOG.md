@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.6] - 2026-03-28
+
+### Added
+
+- Model grouping via `model_schema_group` configuration — organize sidebar models under collapsible group headers with color-coded dots; supports `:namespaces` or a custom `Proc`; same-group nodes cluster via d3 force (#27)
+- Packwerk package discovery — `PackwerkDiscovery` auto-discovers model directories from Packwerk packages (`packwerk.yml` → `package_paths`) (#29)
+- Through edges toggle — legend checkbox to show/hide `:through` edges at runtime; `show_through_edges` config sets initial state (default `true`); through associations remain visible in the detail panel (#31)
+
 ## [0.1.5] - 2026-03-14
 
 ### Added
