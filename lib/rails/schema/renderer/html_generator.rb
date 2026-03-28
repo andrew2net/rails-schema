@@ -63,7 +63,8 @@ module Rails
             expand_columns: @configuration.expand_columns,
             theme: @configuration.theme.to_s,
             grouping_enabled: !@configuration.model_schema_group.nil?,
-            collapse_groups: @configuration.collapse_groups
+            collapse_groups: @configuration.collapse_groups,
+            show_through_edges: @configuration.show_through_edges
           }
           JSON.generate(config).gsub("</", '<\/')
         end

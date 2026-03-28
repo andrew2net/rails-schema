@@ -35,6 +35,10 @@ RSpec.describe Rails::Schema::Configuration do
     expect(config.model_schema_group).to be_nil
   end
 
+  it "has default show_through_edges" do
+    expect(config.show_through_edges).to eq(true)
+  end
+
   describe "#resolved_group_proc" do
     it "returns nil when model_schema_group is nil" do
       expect(config.resolved_group_proc).to be_nil

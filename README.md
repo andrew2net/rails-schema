@@ -64,6 +64,7 @@ Rails::Schema.configure do |config|
   config.exclude_model_if = ->(model) { model.table_name.start_with?("_") }
   config.model_schema_group = :namespaces  # group models by Ruby namespace
   config.collapse_groups = true            # start with groups collapsed
+  config.show_through_edges = true         # show :through edges on the diagram
 end
 ```
 
@@ -78,6 +79,7 @@ end
 | `exclude_model_if` | `nil` | A proc/lambda that receives a model class and returns `true` to exclude it |
 | `model_schema_group` | `nil` | Group models visually — `:namespaces`, or a custom proc (see below) |
 | `collapse_groups` | `true` | Whether sidebar groups start collapsed |
+| `show_through_edges` | `true` | Whether `:through` association edges are shown on the diagram initially (toggleable at runtime via legend checkbox) |
 
 ### Schema format
 
@@ -166,7 +168,8 @@ If the targeted loading doesn't find any models, the gem falls back to a full ea
 - **Shift-click range selection** — hold Shift and click checkboxes to toggle a range at once
 - **Click-to-focus** — click a model to highlight its neighborhood, fading unrelated models
 - **Double-click to isolate** — double-click a model to filter the view to only that model and its direct neighbors
-- **Detail panel** — full column list and associations for the selected model
+- **Through edges toggle** — checkbox in the legend to show/hide `:through` association edges on the diagram; through associations always remain visible in the detail panel regardless of toggle state
+- **Detail panel** — full column list and associations for the selected model; clicking a relation link auto-selects the related model (adding it to the diagram if hidden)
 - **Dark/light theme** — toggle or auto-detect from system preference
 - **Zoom & pan** — scroll wheel, pinch, or buttons
 - **Keyboard shortcuts** — `/` search, `Esc` deselect, `+/-` zoom, `F` fit to screen
