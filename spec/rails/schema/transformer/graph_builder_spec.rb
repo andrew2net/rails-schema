@@ -178,12 +178,14 @@ RSpec.describe Rails::Schema::Transformer::GraphBuilder do
 
     before do
       allow(column_reader).to receive(:read).and_return([])
-      allow(association_reader).to receive(:read).with(model_a).and_return([
-        { from: "Author", to: "Book", association_type: "has_many", label: "books",
-          foreign_key: "author_id", through: nil, polymorphic: false },
-        { from: "Author", to: "Review", association_type: "has_many", label: "reviews",
-          foreign_key: "author_id", through: "books", polymorphic: false }
-      ])
+      allow(association_reader).to receive(:read).with(model_a).and_return(
+        [
+          { from: "Author", to: "Book", association_type: "has_many", label: "books",
+            foreign_key: "author_id", through: nil, polymorphic: false },
+          { from: "Author", to: "Review", association_type: "has_many", label: "reviews",
+            foreign_key: "author_id", through: "books", polymorphic: false }
+        ]
+      )
       allow(association_reader).to receive(:read).with(model_b).and_return([])
       allow(association_reader).to receive(:read).with(model_c).and_return([])
     end
