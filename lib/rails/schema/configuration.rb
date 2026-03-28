@@ -4,7 +4,7 @@ module Rails
   module Schema
     class Configuration
       attr_accessor :output_path, :exclude_models, :exclude_model_if, :title, :theme, :expand_columns, :schema_format,
-                    :model_schema_group, :collapse_groups
+                    :model_schema_group, :collapse_groups, :show_through_edges
 
       def initialize
         @output_path = "docs/schema.html"
@@ -16,6 +16,7 @@ module Rails
         @schema_format = :auto
         @model_schema_group = nil
         @collapse_groups = true
+        @show_through_edges = true
       end
 
       def resolved_group_proc

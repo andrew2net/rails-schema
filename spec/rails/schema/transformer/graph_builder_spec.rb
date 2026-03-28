@@ -168,6 +168,38 @@ RSpec.describe Rails::Schema::Transformer::GraphBuilder do
     end
   end
 
+  describe "#build always includes through edges in data" do
+    let(:model_a) { double("ModelA", name: "Author", table_name: "authors") }
+    let(:model_b) { double("ModelB", name: "Book", table_name: "books") }
+    let(:model_c) { double("ModelC", name: "Review", table_name: "reviews") }
+
+    let(:column_reader) { instance_double(Rails::Schema::Extractor::ColumnReader) }
+    let(:association_reader) { instance_double(Rails::Schema::Extractor::AssociationReader) }
+
+    before do
+      allow(column_reader).to receive(:read).and_return([])
+      allow(association_reader).to receive(:read).with(model_a).and_return([
+        { from: "Author", to: "Book", association_type: "has_many", label: "books",
+          foreign_key: "author_id", through: nil, polymorphic: false },
+        { from: "Author", to: "Review", association_type: "has_many", label: "reviews",
+          foreign_key: "author_id", through: "books", polymorphic: false }
+      ])
+      allow(association_reader).to receive(:read).with(model_b).and_return([])
+      allow(association_reader).to receive(:read).with(model_c).and_return([])
+    end
+
+    let(:builder) { described_class.new(column_reader: column_reader, association_reader: association_reader) }
+
+    it "includes through edges regardless of show_through_edges config" do
+      Rails::Schema.configure { |c| c.show_through_edges = false }
+      result = builder.build([model_a, model_b, model_c])
+      labels = result[:edges].map { |e| e[:label] }
+
+      expect(labels).to include("books")
+      expect(labels).to include("reviews")
+    end
+  end
+
   describe "#build with duplicate model names" do
     let(:dup_model_a) do
       double("DupModelA", name: "HABTM_Things", table_name: "things_roles")

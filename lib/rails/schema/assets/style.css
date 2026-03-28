@@ -549,6 +549,15 @@ body {
   gap: 4px;
 }
 
+.legend-toggle {
+  cursor: pointer;
+}
+
+.legend-toggle input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
 .legend-line {
   width: 20px;
   height: 2px;
