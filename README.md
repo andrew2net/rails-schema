@@ -62,6 +62,8 @@ Rails::Schema.configure do |config|
     "ActionMailbox::*"           # wildcard prefix matching
   ]
   config.exclude_model_if = ->(model) { model.table_name.start_with?("_") }
+  config.model_schema_group = :namespaces  # group models by Ruby namespace
+  config.collapse_groups = true            # start with groups collapsed
 end
 ```
 
@@ -74,6 +76,8 @@ end
 | `schema_format` | `:auto` | Schema source — `:auto`, `:ruby`, `:sql`, or `:mongoid` (see below) |
 | `exclude_models` | `[]` | Models to hide; supports exact names and wildcard prefixes (`"ActionMailbox::*"`) |
 | `exclude_model_if` | `nil` | A proc/lambda that receives a model class and returns `true` to exclude it |
+| `model_schema_group` | `nil` | Group models visually — `:namespaces`, or a custom proc (see below) |
+| `collapse_groups` | `true` | Whether sidebar groups start collapsed |
 
 ### Schema format
 
@@ -100,6 +104,46 @@ When set to `:auto`, Mongoid mode activates automatically if `Mongoid::Document`
 
 The Mongoid pipeline reads fields, types, defaults, and presence validations from your models, and discovers all association types including `embeds_many`, `embeds_one`, `embedded_in`, and `has_and_belongs_to_many`.
 
+### Model grouping
+
+Group models visually by assigning each group a distinct header color in the diagram and organizing them under collapsible headers in the sidebar.
+
+**By namespace** — splits on `::` and groups by the namespace path:
+
+```ruby
+Rails::Schema.configure do |config|
+  config.model_schema_group = :namespaces
+end
+```
+
+This groups `Admin::Dashboard` under "Admin" and `Admin::Reports::Summary` under "Admin > Reports". Non-namespaced models like `User` remain ungrouped.
+
+**Custom proc** — return an array representing the group hierarchy:
+
+```ruby
+Rails::Schema.configure do |config|
+  config.model_schema_group = proc do |model|
+    case model.name
+    when /^Admin::/ then ["Admin"]
+    when /^Billing::/ then ["Billing"]
+    else ["Core"]
+    end
+  end
+end
+```
+
+Returning `["A", "B"]` means group "A" with subgroup "B". Returning `[]` or `nil` leaves the model ungrouped.
+
+**Sidebar behavior with grouping enabled:**
+
+- Each group has a **checkbox** to select/deselect all models in the group (supports indeterminate state for partial selection)
+- **Double-click** a group header to isolate that group — selects only its models and deselects everything else
+- **Click** a group header to collapse/expand its model list
+- A **collapse/expand all** button (▼/▶) appears in the sidebar actions bar to toggle all groups at once
+- Model names are **color-coded** to match their group's color
+- The **group header highlights** when one of its models is selected on the diagram
+- Models in the same group **cluster together** in the force-directed layout
+
 ## How it works
 
 The gem parses your `db/schema.rb` or `db/structure.sql` file to extract table and column information — **no database connection required**. It also introspects loaded ActiveRecord models for association metadata. This means the gem works even if you don't have a local database set up, as long as a schema file is present (which is standard in Rails projects under version control).
@@ -115,6 +159,7 @@ If the targeted loading doesn't find any models, the gem falls back to a full ea
 ## Features
 
 - **No database required** — reads from `db/schema.rb`, `db/structure.sql`, or Mongoid model introspection
+- **Model grouping** — group models by namespace or custom logic; each group gets a distinct color for node headers and sidebar model names, collapsible sidebar sections with checkboxes, a collapse/expand-all toggle, group header highlighting on model selection, and force-layout clustering
 - **Force-directed layout** — models cluster naturally by association density; self-referential-only models are placed in a left column, true orphans in rows above
 - **Searchable sidebar** — filter models by name or table, with a clear button to reset
 - **Select/Deselect All** — operates on filtered (visible) models only, so you can search and bulk-toggle a subset; when all models are selected and a search filter is active, "Select All" narrows the selection to only the filtered models

@@ -61,7 +61,9 @@ module Rails
         def config_json
           config = {
             expand_columns: @configuration.expand_columns,
-            theme: @configuration.theme.to_s
+            theme: @configuration.theme.to_s,
+            grouping_enabled: !@configuration.model_schema_group.nil?,
+            collapse_groups: @configuration.collapse_groups
           }
           JSON.generate(config).gsub("</", '<\/')
         end

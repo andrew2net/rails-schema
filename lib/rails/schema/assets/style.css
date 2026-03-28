@@ -232,6 +232,10 @@ body {
   background: var(--bg-tertiary);
 }
 
+#collapse-groups-btn {
+  margin-left: auto;
+}
+
 #model-list {
   flex: 1;
   overflow-y: auto;
@@ -590,4 +594,60 @@ body {
     transparent 3px, transparent 6px
   );
   background-color: transparent;
+}
+
+/* Sidebar group headers */
+.group-header {
+  display: flex;
+  align-items: center;
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  user-select: none;
+  gap: 6px;
+}
+
+.group-header:hover {
+  background: var(--bg-tertiary);
+}
+
+.group-header.active {
+  background: var(--accent-light);
+}
+
+.group-count {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: normal;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.group-toggle {
+  font-size: 10px;
+  width: 12px;
+  flex-shrink: 0;
+}
+
+.group-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.group-header-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.group-models {
+  border-bottom: 1px solid var(--border-color);
 }

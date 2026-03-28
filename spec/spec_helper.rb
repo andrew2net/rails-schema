@@ -35,6 +35,14 @@ ActiveRecord::Schema.define do
     t.references :post, null: false
     t.references :tag, null: false
   end
+
+  create_table :admin_dashboards do |t|
+    t.string :name, null: false
+  end
+
+  create_table :admin_reports_summaries do |t|
+    t.string :title, null: false
+  end
 end
 
 require "rails/schema"
