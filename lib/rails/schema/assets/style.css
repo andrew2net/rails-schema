@@ -142,6 +142,22 @@ body {
   margin: 0 4px;
 }
 
+#toolbar label.toolbar-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#toolbar label.toolbar-label input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
 #toolbar .shortcuts-hint {
   font-size: 11px;
   color: var(--text-muted);
