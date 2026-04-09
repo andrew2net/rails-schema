@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Manual Positioning toggle — toolbar checkbox that removes all simulation forces when enabled; nodes stay wherever they are dropped and drag-and-drop continues to work normally; unchecking re-enables automatic force-directed layout
+
 ## [0.1.6] - 2026-03-28
 
 ### Added

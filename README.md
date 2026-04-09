@@ -169,6 +169,7 @@ If the targeted loading doesn't find any models, the gem falls back to a full ea
 - **Click-to-focus** — click a model to highlight its neighborhood, fading unrelated models
 - **Double-click to isolate** — double-click a model to filter the view to only that model and its direct neighbors
 - **Through edges toggle** — checkbox in the legend to show/hide `:through` association edges on the diagram; through associations always remain visible in the detail panel regardless of toggle state
+- **Manual Positioning** — toolbar checkbox that removes all simulation forces; nodes stay exactly where you drop them and drag-and-drop continues to work normally; uncheck to re-enable automatic force-directed layout
 - **Detail panel** — full column list and associations for the selected model; clicking a relation link auto-selects the related model (adding it to the diagram if hidden)
 - **Dark/light theme** — toggle or auto-detect from system preference
 - **Zoom & pan** — scroll wheel, pinch, or buttons
