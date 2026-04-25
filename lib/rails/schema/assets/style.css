@@ -142,9 +142,63 @@ body {
   margin: 0 4px;
 }
 
+#toolbar label.toolbar-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#toolbar label.toolbar-label input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
 #toolbar .shortcuts-hint {
   font-size: 11px;
   color: var(--text-muted);
+}
+
+.toolbar-dropdown {
+  position: relative;
+}
+
+.toolbar-dropdown-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 300;
+  min-width: 160px;
+}
+
+.toolbar-dropdown-menu.open {
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar-dropdown-menu button {
+  border: none;
+  border-radius: 0;
+  text-align: left;
+  padding: 8px 12px;
+}
+
+.toolbar-dropdown-menu button:first-child {
+  border-radius: 6px 6px 0 0;
+}
+
+.toolbar-dropdown-menu button:last-of-type {
+  border-radius: 0 0 6px 6px;
 }
 
 /* Sidebar */

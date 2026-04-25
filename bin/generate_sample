@@ -1,0 +1,145 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+# bin/generate_sample
+#
+# Generates a self-contained sample HTML output from a set of representative
+# test models — no Rails app or database required.
+#
+# Usage:
+#   bundle exec bin/generate_sample                  # writes to tmp/schema.html
+#   bundle exec bin/generate_sample /path/to/out.html
+
+# rubocop:disable Style/OneClassPerFile
+
+require "bundler/setup"
+require "active_record"
+require "rails/schema"
+
+# ---------------------------------------------------------------------------
+# 1. Silence ActiveRecord's schema-definition output
+# ---------------------------------------------------------------------------
+ActiveRecord::Schema.verbose = false if ActiveRecord::Schema.respond_to?(:verbose=)
+
+# ---------------------------------------------------------------------------
+# 2. In-memory SQLite database with a representative schema
+# ---------------------------------------------------------------------------
+ActiveRecord::Base.establish_connection(adapter: "sqlite3", database: ":memory:")
+
+ActiveRecord::Schema.define do # rubocop:disable Metrics/BlockLength
+  create_table :users do |t|
+    t.string  :name,  null: false
+    t.string  :email, null: false
+    t.string  :role,  default: "member", null: false
+    t.timestamps
+  end
+
+  create_table :posts do |t|
+    t.references :user,      null: false
+    t.string     :title,     null: false
+    t.text       :body
+    t.boolean    :published, default: false, null: false
+    t.timestamps
+  end
+
+  create_table :comments do |t|
+    t.references :commentable, polymorphic: true, null: false
+    t.references :user
+    t.text       :body, null: false
+    t.timestamps
+  end
+
+  create_table :tags do |t|
+    t.string :name, null: false
+  end
+
+  # HABTM join table (no model)
+  create_table :posts_tags, id: false do |t|
+    t.references :post, null: false
+    t.references :tag,  null: false
+  end
+
+  create_table :admin_dashboards do |t|
+    t.string  :name,     null: false
+    t.integer :position, default: 0
+  end
+
+  create_table :admin_reports_summaries do |t|
+    t.string  :title,              null: false
+    t.integer :admin_dashboard_id, null: false
+    t.timestamps
+  end
+end
+
+# ---------------------------------------------------------------------------
+# 3. Model definitions — representative associations for a rich diagram
+# ---------------------------------------------------------------------------
+class User < ActiveRecord::Base
+  has_many :posts
+  has_many :comments
+  has_many :tags, through: :posts
+end
+
+class Post < ActiveRecord::Base
+  belongs_to :user
+  has_many   :comments, as: :commentable
+  has_and_belongs_to_many :tags
+end
+
+class Comment < ActiveRecord::Base
+  belongs_to :commentable, polymorphic: true
+  belongs_to :user, optional: true
+end
+
+class Tag < ActiveRecord::Base
+  has_and_belongs_to_many :posts
+end
+
+module Admin
+  class Dashboard < ActiveRecord::Base
+    self.table_name = "admin_dashboards"
+    has_many :summaries,
+             class_name: "Admin::Reports::Summary",
+             foreign_key: "admin_dashboard_id"
+  end
+end
+
+module Admin
+  module Reports
+    class Summary < ActiveRecord::Base
+      self.table_name = "admin_reports_summaries"
+      belongs_to :dashboard,
+                 class_name: "Admin::Dashboard",
+                 foreign_key: "admin_dashboard_id"
+    end
+  end
+end
+
+# ---------------------------------------------------------------------------
+# 4. Configure rails-schema
+# ---------------------------------------------------------------------------
+Rails::Schema.configure do |config|
+  config.title = "Sample Schema — rails-schema gem"
+  config.model_schema_group = :namespaces # groups Admin::* under "Admin"
+  config.expand_columns = false
+  config.show_through_edges = true
+end
+
+# ---------------------------------------------------------------------------
+# 5. Build graph data directly (no ModelScanner / Rails app needed)
+# ---------------------------------------------------------------------------
+MODELS = [User, Post, Comment, Tag, Admin::Dashboard, Admin::Reports::Summary].freeze
+
+column_reader = Rails::Schema::Extractor::ColumnReader.new(schema_data: {})
+graph_data    = Rails::Schema::Transformer::GraphBuilder.new(column_reader: column_reader).build(MODELS)
+graph_data[:metadata][:mode] = "active_record"
+
+# ---------------------------------------------------------------------------
+# 6. Render to file (path from argv or default to tmp/schema.html)
+# ---------------------------------------------------------------------------
+output_path = ARGV[0] || File.expand_path("../tmp/schema.html", __dir__)
+
+written_to = Rails::Schema::Renderer::HtmlGenerator.new(graph_data: graph_data).render_to_file(output_path)
+puts "Sample schema written to: #{written_to}"
+
+# rubocop:enable Style/OneClassPerFile

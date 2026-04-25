@@ -42,7 +42,17 @@
       <button id="fit-btn" title="Fit to screen (F)">Fit</button>
       <button id="theme-btn" title="Toggle theme">Theme</button>
       <span class="toolbar-divider"></span>
-      <button id="export-mermaid-btn" title="Export as Mermaid (Markdown)">Export Mermaid</button>
+      <label class="toolbar-label" for="manual-positioning"><input type="checkbox" id="manual-positioning">Manual Positioning</label>
+      <span class="toolbar-divider"></span>
+      <div class="toolbar-dropdown">
+        <button id="file-menu-btn">File &#9660;</button>
+        <div class="toolbar-dropdown-menu" id="file-menu">
+          <button id="export-mermaid-btn">Export Mermaid</button>
+          <button id="save-layout-btn">Save Layout</button>
+          <button id="load-layout-btn">Load Layout</button>
+          <input type="file" id="load-layout-input" accept=".json" style="display:none">
+        </div>
+      </div>
       <span class="shortcuts-hint">/ search · Esc deselect · F fit</span>
     </div>
 
