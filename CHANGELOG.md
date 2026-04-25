@@ -4,14 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [0.1.7] - 2026-04-25
 
 ### Added
 
-- Manual Positioning toggle — toolbar checkbox that removes all simulation forces when enabled; nodes stay wherever they are dropped and drag-and-drop continues to work normally; unchecking re-enables automatic force-directed layout
-- Layout persistence — node positions, visibility, zoom, and toggle states are auto-saved to `localStorage` and restored on page reload; layouts are scoped per schema via a fingerprint hash so different projects don't collide
-- Save/Load Layout — export the current layout as a portable `.json` file to share with teammates or check into git; import a saved layout file to restore it
-- File menu dropdown — toolbar "File" menu groups Export Mermaid, Save Layout, and Load Layout actions
+- Manual Positioning toggle — toolbar checkbox that removes all simulation forces when enabled; nodes stay wherever they are dropped and drag-and-drop continues to work normally; unchecking re-enables automatic force-directed layout (#33)
+- Layout persistence — node positions, visibility, zoom, and toggle states are auto-saved to `localStorage` and restored on page reload; layouts are scoped per schema via a fingerprint hash so different projects don't collide (#33)
+- Save/Load Layout — export the current layout as a portable `.json` file to share with teammates or check into git; import a saved layout file to restore it (#33)
+- File menu dropdown — toolbar "File" menu groups Export Mermaid, Save Layout, and Load Layout actions (#33)
 
 ## [0.1.6] - 2026-03-28
 
