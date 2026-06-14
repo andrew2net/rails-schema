@@ -67,8 +67,8 @@ module Rails
         def parse_table_body(body)
           columns = []
           pk_columns = []
-          body.each_line do |raw|
-            line = raw.strip.chomp(",")
+          split_columns(body).each do |segment|
+            line = segment.strip
             next if line.empty?
 
             if (pk = extract_pk_constraint(line))
@@ -79,6 +79,50 @@ module Rails
             end
           end
           [columns, pk_columns]
+        end
+
+        # Splits a table body on top-level commas, ignoring commas inside
+        # parentheses (e.g. decimal(5,4), FK clauses) or quoted strings. This
+        # handles both PostgreSQL (one column per line) and SQLite (whole table
+        # on a single line) structure.sql dumps.
+        def split_columns(body)
+          segments = []
+          current = +""
+          state = { depth: 0, squote: false, dquote: false }
+          strip_comments(body).each_char do |ch|
+            if split_point?(ch, state)
+              segments << current
+              current = +""
+            else
+              current << ch
+            end
+          end
+          segments << current
+        end
+
+        def split_point?(char, state)
+          toggle_quote(char, state)
+          return false if quoted?(state)
+
+          case char
+          when "(" then state[:depth] += 1
+          when ")" then state[:depth] -= 1
+          when "," then return state[:depth].zero?
+          end
+          false
+        end
+
+        def toggle_quote(char, state)
+          state[:squote] = !state[:squote] if char == "'" && !state[:dquote]
+          state[:dquote] = !state[:dquote] if char == '"' && !state[:squote]
+        end
+
+        def quoted?(state)
+          state[:squote] || state[:dquote]
+        end
+
+        def strip_comments(sql)
+          sql.gsub(%r{/\*.*?\*/}m, "")
         end
 
         def extract_pk_constraint(line)
