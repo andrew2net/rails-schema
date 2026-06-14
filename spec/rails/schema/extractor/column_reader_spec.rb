@@ -90,5 +90,32 @@ RSpec.describe Rails::Schema::Extractor::ColumnReader do
         expect(columns.find { |c| c[:name] == "title" }).to be_truthy
       end
     end
+
+    context "with view_tables" do
+      let(:schema_data) do
+        { "messages" => [{ name: "id", type: "", nullable: true, default: nil, primary: false }] }
+      end
+
+      subject(:reader) { described_class.new(schema_data: schema_data, view_tables: ["messages"]) }
+
+      it "prefers live DB columns (with types) over parsed view names" do
+        model = double("View", name: "Message", table_name: "messages", primary_key: "id")
+        db_col = double("Col", name: "id", type: :integer, null: false, default: nil)
+        allow(model).to receive(:columns).and_return([db_col])
+
+        columns = reader.read(model)
+
+        expect(columns).to eq([{ name: "id", type: "integer", nullable: false, primary: true, default: nil }])
+      end
+
+      it "falls back to parsed view column names when no DB connection is available" do
+        model = double("View", name: "Message", table_name: "messages")
+        allow(model).to receive(:columns).and_raise(StandardError, "no db")
+
+        columns = nil
+        expect { columns = reader.read(model) }.to output(/Could not read columns/).to_stderr
+        expect(columns.map { |c| c[:name] }).to eq(["id"])
+      end
+    end
   end
 end

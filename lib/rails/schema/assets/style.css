@@ -364,6 +364,19 @@ body {
   stroke-width: 2.5;
 }
 
+.node-rect.is-view {
+  stroke-dasharray: 5 3;
+}
+
+.node-view-badge {
+  fill: var(--node-header-text);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  opacity: 0.85;
+  font-family: inherit;
+}
+
 .node-header-rect {
   fill: var(--node-header-bg);
   rx: 8;
@@ -502,6 +515,18 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+#detail-content .detail-view-tag {
+  display: inline-block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--node-header-text);
+  background: var(--accent);
+  border-radius: 3px;
+  padding: 1px 5px;
+  vertical-align: middle;
 }
 
 #detail-content h3 {

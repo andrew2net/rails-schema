@@ -342,6 +342,54 @@ RSpec.describe Rails::Schema::Extractor::StructureSqlParser do
       expect(parser.parse_content("")).to eq({})
     end
 
+    context "with SQL views (CREATE VIEW)" do
+      it "records view names in #views and includes them in the table map" do
+        content = <<~SQL
+          CREATE TABLE "sms" ("id" integer PRIMARY KEY, "to_phone" varchar);
+          CREATE VIEW messages AS
+            SELECT id, to_phone AS recipient FROM sms
+           /* messages(id,recipient) */;
+        SQL
+
+        result = parser.parse_content(content)
+
+        expect(parser.views.to_a).to eq(["messages"])
+        expect(result).to have_key("messages")
+      end
+
+      it "extracts view column names from the SQLite hint comment" do
+        content = <<~SQL
+          CREATE VIEW messages AS
+            SELECT 'sms' AS channel, id, to_phone AS recipient FROM sms
+           /* messages(channel,id,recipient) */;
+        SQL
+
+        result = parser.parse_content(content)
+
+        expect(result["messages"].map { |c| c[:name] }).to eq(%w[channel id recipient])
+        expect(result["messages"].map { |c| c[:type] }).to all(eq(""))
+        expect(result["messages"].none? { |c| c[:primary] }).to be true
+      end
+
+      it "falls back to SELECT-list aliases when no hint comment is present" do
+        content = <<~SQL
+          CREATE VIEW messages AS
+            SELECT 'sms' AS channel, id, to_phone AS recipient, NULL AS subject FROM sms;
+        SQL
+
+        result = parser.parse_content(content)
+
+        expect(result["messages"].map { |c| c[:name] }).to eq(%w[channel id recipient subject])
+      end
+
+      it "resets #views between parses" do
+        parser.parse_content("CREATE VIEW v AS SELECT id FROM t /* v(id) */;")
+        parser.parse_content("CREATE TABLE \"t\" (\"id\" integer PRIMARY KEY);")
+
+        expect(parser.views.to_a).to be_empty
+      end
+    end
+
     context "with SQLite-format dumps (whole table on one line)" do
       it "parses all columns from a single-line CREATE TABLE" do
         content = <<~SQL

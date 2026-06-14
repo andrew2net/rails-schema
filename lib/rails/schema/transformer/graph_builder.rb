@@ -7,10 +7,11 @@ module Rails
     module Transformer
       class GraphBuilder
         def initialize(column_reader: Extractor::ColumnReader.new, association_reader: Extractor::AssociationReader.new,
-                       configuration: ::Rails::Schema.configuration)
+                       configuration: ::Rails::Schema.configuration, view_tables: nil)
           @column_reader = column_reader
           @association_reader = association_reader
           @group_proc = configuration.resolved_group_proc
+          @view_tables = view_tables ? Set.new(view_tables) : Set.new
         end
 
         def build(models)
@@ -47,7 +48,8 @@ module Rails
             id: unique_id,
             table_name: model.table_name,
             columns: @column_reader.read(model),
-            group: group
+            group: group,
+            view: @view_tables.include?(model.table_name)
           )
         end
 

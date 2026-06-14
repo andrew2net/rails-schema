@@ -47,9 +47,10 @@ end
 ### Data Extraction Strategy
 
 1. **`db/schema.rb`** — `SchemaFileParser` parses with regex (table names, columns, types, nullable, defaults, PKs)
-2. **`db/structure.sql`** — `StructureSqlParser` parses SQL `CREATE TABLE` statements, maps SQL types to Rails types
+2. **`db/structure.sql`** — `StructureSqlParser` parses SQL `CREATE TABLE` statements, maps SQL types to Rails types. Column splitting is parenthesis/quote-aware (a top-level-comma splitter), so it handles both PostgreSQL `pg_dump` (one column per line) and SQLite (whole table on one line) dumps. Also parses `CREATE VIEW` statements — view names go into `#views` (a Set), and view column names come from the SQLite hint comment (`/* viewname(col,...) */`) or the `SELECT` list
 3. **ActiveRecord reflection API** — `AssociationReader` uses `reflect_on_all_associations` for associations
 4. **`Model.columns`** — `ColumnReader` falls back to this when table not found in schema_data
+5. **SQL views** — `parse_schema` returns `[columns, view_names]`. `ColumnReader.new(view_tables:)` reads view columns from live DB introspection first (accurate types), falling back to the parsed names offline. `GraphBuilder.new(view_tables:)` sets `Node#view`, which the frontend renders with a "VIEW" badge + dashed border. Views are always included (no config flag); the model just needs `self.table_name` pointing at the view
 
 ### Model Discovery
 
