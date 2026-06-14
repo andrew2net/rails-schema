@@ -249,4 +249,28 @@ RSpec.describe Rails::Schema::Transformer::GraphBuilder do
       expect(edge[:from]).to eq("HABTM_Things (things_roles)")
     end
   end
+
+  describe "#build with view_tables" do
+    let(:column_reader) { instance_double(Rails::Schema::Extractor::ColumnReader) }
+    let(:association_reader) { instance_double(Rails::Schema::Extractor::AssociationReader) }
+    let(:view_model) { double("Message", name: "Message", table_name: "messages") }
+    let(:table_model) { double("Account", name: "Account", table_name: "accounts") }
+
+    let(:builder) do
+      described_class.new(column_reader: column_reader, association_reader: association_reader,
+                          view_tables: ["messages"])
+    end
+
+    before do
+      allow(column_reader).to receive(:read).and_return([])
+      allow(association_reader).to receive(:read).and_return([])
+    end
+
+    it "flags nodes whose table is a view and leaves tables unflagged" do
+      result = builder.build([view_model, table_model])
+
+      expect(result[:nodes].find { |n| n[:id] == "Message" }[:view]).to be true
+      expect(result[:nodes].find { |n| n[:id] == "Account" }).not_to have_key(:view)
+    end
+  end
 end

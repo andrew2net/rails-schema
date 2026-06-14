@@ -52,10 +52,10 @@ module Rails
       private
 
       def generate_active_record(output:)
-        schema_data = parse_schema
+        schema_data, views = parse_schema
         models = Extractor::ModelScanner.new(schema_data: schema_data).scan
-        column_reader = Extractor::ColumnReader.new(schema_data: schema_data)
-        graph_data = Transformer::GraphBuilder.new(column_reader: column_reader).build(models)
+        column_reader = Extractor::ColumnReader.new(schema_data: schema_data, view_tables: views)
+        graph_data = Transformer::GraphBuilder.new(column_reader: column_reader, view_tables: views).build(models)
         graph_data[:metadata][:mode] = "active_record"
         generator = Renderer::HtmlGenerator.new(graph_data: graph_data)
         generator.render_to_file(output)
@@ -84,16 +84,23 @@ module Rails
         generator.render_to_file(output)
       end
 
+      # Returns [columns_by_table, view_table_names]. For :auto, falls through
+      # to structure.sql when schema.rb yields nothing.
       def parse_schema
         case configuration.schema_format
         when :ruby
-          Extractor::SchemaFileParser.new.parse
+          parse_with(Extractor::SchemaFileParser.new)
         when :sql
-          Extractor::StructureSqlParser.new.parse
+          parse_with(Extractor::StructureSqlParser.new)
         when :auto
-          data = Extractor::SchemaFileParser.new.parse
-          data.empty? ? Extractor::StructureSqlParser.new.parse : data
+          columns, views = parse_with(Extractor::SchemaFileParser.new)
+          columns.empty? ? parse_with(Extractor::StructureSqlParser.new) : [columns, views]
         end
+      end
+
+      def parse_with(parser)
+        columns = parser.parse
+        [columns, parser.views]
       end
     end
   end

@@ -1,11 +1,19 @@
 # frozen_string_literal: true
 
+require "set"
+
 module Rails
   module Schema
     module Extractor
       class SchemaFileParser
+        # schema.rb does not declare SQL views, so this is always empty; the
+        # reader exists so SchemaFileParser and StructureSqlParser share an
+        # interface (see Rails::Schema.parse_schema).
+        attr_reader :views
+
         def initialize(schema_path = nil)
           @schema_path = schema_path
+          @views = Set.new
         end
 
         def parse

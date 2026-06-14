@@ -48,7 +48,7 @@ RSpec.describe Rails::Schema do
     let(:graph_data) { { nodes: [], edges: [], metadata: {} } }
     let(:output_path) { "/tmp/schema.html" }
 
-    let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: schema_data) }
+    let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: schema_data, views: []) }
     let(:scanner) { instance_double(Rails::Schema::Extractor::ModelScanner, scan: models) }
     let(:column_reader) { instance_double(Rails::Schema::Extractor::ColumnReader) }
     let(:graph_builder) { instance_double(Rails::Schema::Transformer::GraphBuilder, build: graph_data) }
@@ -82,7 +82,8 @@ RSpec.describe Rails::Schema do
       Rails::Schema.generate
 
       expect(Rails::Schema::Extractor::ModelScanner).to have_received(:new).with(schema_data: schema_data)
-      expect(Rails::Schema::Extractor::ColumnReader).to have_received(:new).with(schema_data: schema_data)
+      expect(Rails::Schema::Extractor::ColumnReader).to have_received(:new)
+        .with(schema_data: schema_data, view_tables: [])
     end
 
     it "sets mode to active_record in graph metadata" do
@@ -179,8 +180,8 @@ RSpec.describe Rails::Schema do
     let(:ruby_data) { { "users" => [{ name: "id", type: "integer" }] } }
     let(:sql_data) { { "posts" => [{ name: "id", type: "bigint" }] } }
 
-    let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: ruby_data) }
-    let(:sql_parser) { instance_double(Rails::Schema::Extractor::StructureSqlParser, parse: sql_data) }
+    let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: ruby_data, views: []) }
+    let(:sql_parser) { instance_double(Rails::Schema::Extractor::StructureSqlParser, parse: sql_data, views: []) }
 
     let(:scanner) { instance_double(Rails::Schema::Extractor::ModelScanner, scan: []) }
     let(:column_reader) { instance_double(Rails::Schema::Extractor::ColumnReader) }
@@ -234,7 +235,7 @@ RSpec.describe Rails::Schema do
     end
 
     context "when schema_format is :auto and ruby file returns empty hash" do
-      let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: {}) }
+      let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: {}, views: []) }
 
       before do
         Rails::Schema.configure { |c| c.schema_format = :auto }
@@ -251,8 +252,8 @@ RSpec.describe Rails::Schema do
     end
 
     context "when both parsers return empty hashes" do
-      let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: {}) }
-      let(:sql_parser) { instance_double(Rails::Schema::Extractor::StructureSqlParser, parse: {}) }
+      let(:ruby_parser) { instance_double(Rails::Schema::Extractor::SchemaFileParser, parse: {}, views: []) }
+      let(:sql_parser) { instance_double(Rails::Schema::Extractor::StructureSqlParser, parse: {}, views: []) }
 
       before do
         Rails::Schema.configure { |c| c.schema_format = :auto }

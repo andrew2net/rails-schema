@@ -6,6 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 
 ## [0.1.8] - 2026-06-14
 
+### Added
+
+- SQL view support — models backed by a SQL view (`CREATE VIEW`, e.g. `self.table_name = "some_view"`) now appear on the diagram instead of being silently dropped. `StructureSqlParser` parses `CREATE VIEW` statements (column names from the SQLite hint comment or the `SELECT` list); columns are read from live DB introspection when a connection is available (accurate types) and fall back to the parsed names offline. View nodes are visually distinguished with a "VIEW" badge and a dashed border, plus a "VIEW" tag in the detail panel.
+
 ### Fixed
 
 - SQLite `structure.sql` parsing — `StructureSqlParser` now correctly extracts all columns from SQLite-format dumps, which place the entire `CREATE TABLE` on a single line. Previously only the primary key was read (every model rendered with just its `id`). Column splitting is now parenthesis- and quote-aware, so commas inside type modifiers (`decimal(5,4)`), `FOREIGN KEY` clauses, and string literals no longer break parsing; inline C-style comments (`/* ... */`) are stripped. PostgreSQL `pg_dump` output continues to parse as before.
