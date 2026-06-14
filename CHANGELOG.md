@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.8] - 2026-06-14
+
+### Fixed
+
+- SQLite `structure.sql` parsing — `StructureSqlParser` now correctly extracts all columns from SQLite-format dumps, which place the entire `CREATE TABLE` on a single line. Previously only the primary key was read (every model rendered with just its `id`). Column splitting is now parenthesis- and quote-aware, so commas inside type modifiers (`decimal(5,4)`), `FOREIGN KEY` clauses, and string literals no longer break parsing; inline C-style comments (`/* ... */`) are stripped. PostgreSQL `pg_dump` output continues to parse as before.
+
 ## [0.1.7] - 2026-04-25
 
 ### Added

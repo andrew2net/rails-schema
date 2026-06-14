@@ -341,6 +341,56 @@ RSpec.describe Rails::Schema::Extractor::StructureSqlParser do
     it "returns empty hash for empty content" do
       expect(parser.parse_content("")).to eq({})
     end
+
+    context "with SQLite-format dumps (whole table on one line)" do
+      it "parses all columns from a single-line CREATE TABLE" do
+        content = <<~SQL
+          CREATE TABLE IF NOT EXISTS "users" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "email" varchar NOT NULL, "name" varchar, "created_at" datetime(6) NOT NULL);
+        SQL
+
+        result = parser.parse_content(content)
+        cols = result["users"]
+
+        expect(cols.map { |c| c[:name] }).to eq(%w[id email name created_at])
+        expect(cols.find { |c| c[:name] == "id" }[:primary]).to be true
+        expect(cols.find { |c| c[:name] == "email" }[:nullable]).to be false
+      end
+
+      it "does not split on commas inside type modifiers like decimal(5,4)" do
+        content = <<~SQL
+          CREATE TABLE IF NOT EXISTS "invoices" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "tax_rate" decimal(5,4) DEFAULT 0.0 NOT NULL, "total_cents" integer DEFAULT 0 NOT NULL);
+        SQL
+
+        result = parser.parse_content(content)
+        cols = result["invoices"]
+
+        expect(cols.map { |c| c[:name] }).to eq(%w[id tax_rate total_cents])
+        expect(cols.find { |c| c[:name] == "tax_rate" }[:type]).to eq("decimal")
+      end
+
+      it "does not split on commas inside FOREIGN KEY clauses" do
+        content = <<~SQL
+          CREATE TABLE IF NOT EXISTS "memberships" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "account_id" integer NOT NULL, "user_id" integer NOT NULL, CONSTRAINT "fk_a" FOREIGN KEY ("account_id") REFERENCES "accounts" ("id"), CONSTRAINT "fk_b" FOREIGN KEY ("user_id") REFERENCES "users" ("id"));
+        SQL
+
+        result = parser.parse_content(content)
+        cols = result["memberships"]
+
+        expect(cols.map { |c| c[:name] }).to eq(%w[id account_id user_id])
+      end
+
+      it "strips inline C-style comments" do
+        content = <<~SQL
+          CREATE TABLE IF NOT EXISTS "accounts" ("id" integer PRIMARY KEY AUTOINCREMENT NOT NULL, "balance" integer DEFAULT 0 NOT NULL /*application='Fieldo'*/, "terms" integer DEFAULT 30 NOT NULL /*application='Fieldo'*/);
+        SQL
+
+        result = parser.parse_content(content)
+        cols = result["accounts"]
+
+        expect(cols.map { |c| c[:name] }).to eq(%w[id balance terms])
+        expect(cols.find { |c| c[:name] == "terms" }[:type]).to eq("integer")
+      end
+    end
   end
 
   describe "#parse" do
