@@ -23,6 +23,11 @@ Add to your Gemfile:
 gem "rails-schema", group: :development
 ```
 
+or 
+```bash
+bundle add rails-scheme -g development
+```
+
 Then run:
 
 ```bash
