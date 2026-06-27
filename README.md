@@ -185,6 +185,11 @@ If the targeted loading doesn't find any models, the gem falls back to a full ea
 
 If you find this gem useful, consider [buying me a coffee](https://www.paypal.com/donate/?hosted_button_id=5PZC9UEJWFJYJ).
 
+## Contributing
+
+Bug reports and pull requests are welcome. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for development setup and guidelines.
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
